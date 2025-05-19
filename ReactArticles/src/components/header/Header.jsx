@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import logo from "../../assets/img/logo.png";
+import logo from "../../assets/img/site-logo.png";
 import classes from "./header.module.css";
 
 function Header() {

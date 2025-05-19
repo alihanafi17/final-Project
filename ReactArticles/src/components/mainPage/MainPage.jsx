@@ -57,8 +57,9 @@ function MainPage() {
       <section className={classes.section1}>
         <h1>New Season</h1>
         <p>
-          Discover our latest arrivals crafted with premium materials and timeless designs.
-          Elevate your wardrobe with pieces that blend comfort, style, and sustainability.
+          Discover our latest arrivals crafted with premium materials and
+          timeless designs. Elevate your wardrobe with pieces that blend
+          comfort, style, and sustainability.
         </p>
         <div className={classes.btns}>
           <button onClick={() => navigate("/men")}>Shop Men</button>
@@ -67,13 +68,19 @@ function MainPage() {
       </section>
       <section className={classes.section2}>
         <h1>Featured Products</h1>
-        <p className={classes.featuredSubtitle}>Our handpicked selection just for you</p>
+        <p className={classes.featuredSubtitle}>
+          Our handpicked selection just for you
+        </p>
         <div className={classes.FeaturedProducts}>
           {products
             .sort(() => 0.5 - Math.random()) // Randomly shuffle the products array
             .slice(0, 5) // Take only the first 5 products
             .map((product) => (
-              <ProductShow key={crypto.randomUUID()} product={product} featured={true} />
+              <ProductShow
+                key={crypto.randomUUID()}
+                product={product}
+                featured={true}
+              />
             ))}
         </div>
       </section>
@@ -82,8 +89,9 @@ function MainPage() {
         <div>
           <h2>Women's collection</h2>
           <p>
-            Explore our curated women's collection featuring elegant silhouettes and versatile pieces
-            designed to empower your personal style for every occasion.
+            Explore our curated women's collection featuring elegant silhouettes
+            and versatile pieces designed to empower your personal style for
+            every occasion.
           </p>
         </div>
       </section>
@@ -91,8 +99,9 @@ function MainPage() {
         <div>
           <h2>Men's collection</h2>
           <p>
-            Discover refined essentials for the modern man, combining exceptional craftsmanship
-            with contemporary design for effortless, sophisticated style.
+            Discover refined essentials for the modern man, combining
+            exceptional craftsmanship with contemporary design for effortless,
+            sophisticated style.
           </p>
         </div>
         <img src={mensImage} alt="Men's Collection" />

@@ -2,27 +2,22 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import mensImage from "../../assets/img/mensCollectionCover.jpg";
 import classes from "./productPage.module.css";
+import { useCart } from "../../context/CartContext";
 
 function ProductPage({ products }) {
-  const { id } = useParams(); // Get the id parameter from the URL
+  const { id } = useParams();
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [productData, setProductData] = useState(null);
-  
+  const { addToCart } = useCart();
+
   useEffect(() => {
-    // Find the product with the matching ID from the products array
     if (products && products.length > 0) {
-      console.log("Looking for product with ID:", id);
-      console.log("First product structure:", products[0]);
-      
-      // Check for different possible ID properties
       const foundProduct = products.find(product => 
         String(product.product_id) === String(id) || 
         String(product._id) === String(id) || 
         String(product.id) === String(id)
       );
-      
-      console.log("Found product:", foundProduct);
       setProductData(foundProduct);
     }
   }, [id, products]);
@@ -35,14 +30,17 @@ function ProductPage({ products }) {
     setQuantity((prev) => Math.max(1, prev + amount));
   };
 
+  const handleAddToCart = () => {
+    if (!selectedSize) {
+      alert("Please select a size");
+      return;
+    }
+    addToCart(productData, selectedSize, quantity);
+    alert("Product added to cart!");
+  };
+
   const sizes = ["XS", "S", "M", "L"];
 
-  // Add console logs to debug
-  console.log("ID from URL:", id);
-  console.log("Products array:", products);
-  console.log("Found product:", productData);
-
-  // Check if productData is null
   if (!productData) {
     return <div className={classes.loading}>Loading product...</div>;
   }
@@ -85,7 +83,7 @@ function ProductPage({ products }) {
           </div>
         </div>
 
-        <button className={classes.addToCart}>Add to Cart</button>
+        <button className={classes.addToCart} onClick={handleAddToCart}>Add to Cart</button>
       </div>
     </div>
   );

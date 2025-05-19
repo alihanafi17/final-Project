@@ -72,10 +72,10 @@ function Header() {
             <Link to="/login" className={classes.header__action_icon}>
               <i className="fas fa-user"></i>
             </Link>
-            <a href="#" className={classes.header__action_icon}>
+            <Link to="/cartPage" className={classes.header__action_icon}>
               <i className="fas fa-shopping-bag"></i>
               <span className={classes.cart_count}>0</span>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

@@ -32,11 +32,11 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  const { order_date, total_amount, email } = req.body;
+  const { total_amount, email, status } = req.body;
   const query =
-    "INSERT INTO users (order_date,total_amount ,email) VALUES (?, ?, ?)";
+    "INSERT INTO orders (total_amount ,email,status) VALUES ( ?, ?,?)";
 
-  db.query(query, [order_date, total_amount, email], (err, results) => {
+  db.query(query, [total_amount, email, status], (err, results) => {
     if (err) {
       res.status(500).send(err);
       return;
@@ -47,19 +47,17 @@ router.post("/", (req, res) => {
 
 router.put("/:id", (req, res) => {
   const { id } = req.params;
+  const { status } = req.body;
 
-  const { order_date, total_amount, email } = req.body;
+  const query = "UPDATE orders SET status = ? WHERE order_id = ?";
 
-  const query =
-    "UPDATE orders SET order_date=?, total_amount=?, email=? WHERE order_id=?";
-
-  db.query(query, [id, order_date, total_amount, email], (err, results) => {
+  db.query(query, [status, id], (err, results) => {
     if (err) {
       res.status(500).send(err);
       return;
     }
 
-    res.json({ message: "order updated!" });
+    res.json({ message: "Order updated!" });
   });
 });
 

@@ -82,7 +82,11 @@ function Login() {
             <button type="submit" className={classes.loginButton}>
               Login
             </button>
-            <button type="button" className={classes.forgotButton}>
+            <button
+              type="button"
+              className={classes.forgotButton}
+              onClick={() => navigate("/forgotPassword")}
+            >
               Forgot Password?
             </button>
             <button
@@ -95,26 +99,6 @@ function Login() {
           </div>
         </form>
       </div>
-
-      {/* <div className={classes.demoAccounts}>
-        <h4>Test Users:</h4>
-        <ul>
-          <li>
-            Email: <code>alice@example.com</code>, Password:{" "}
-            <code>alice123</code>
-          </li>
-          <li>
-            Email: <code>bob@example.com</code>, Password: <code>bob123</code>
-          </li>
-          <li>
-            Email: <code>carol@example.com</code>, Password:{" "}
-            <code>carol123</code>
-          </li>
-          <li>
-            Email: <code>dave@example.com</code>, Password: <code>dave123</code>
-          </li>
-        </ul>
-      </div> */}
     </div>
   );
 }

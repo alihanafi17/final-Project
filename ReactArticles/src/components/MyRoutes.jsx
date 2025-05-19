@@ -15,6 +15,7 @@ import Login from "./login/Login";
 import AdminPage from "./adminPage/AdminPage";
 import UserPage from "./userPage/UserPage";
 import RegisterPage from "./registerPage/RegisterPage";
+import ForgotPassword from "./forgotPassword/ForgotPassword";
 //import Main from './Main';
 
 function MyRoutes() {
@@ -58,6 +59,7 @@ function MyRoutes() {
         <Route path="/adminPage" element={<AdminPage />} />
         <Route path="/userPage" element={<UserPage />} />
         <Route path="/registerPage" element={<RegisterPage />} />
+        <Route path="/forgotPassword" element={<ForgotPassword />} />
       </Routes>
       <Footer />
     </>

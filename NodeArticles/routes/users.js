@@ -194,6 +194,60 @@ router.put("/:email", (req, res) => {
   });
 });
 
+router.put("/forgot-password/:email", (req, res) => {
+  const { email } = req.params;
+  const { password } = req.body;
+
+  db.query("SELECT id FROM users WHERE email = ?", [email], (err, users) => {
+    if (err)
+      return res.status(500).json({ message: "Database error", error: err });
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const updateUser = (hashedPass) => {
+      const query = "UPDATE users SET password = ? WHERE email = ?";
+      const params = [hashedPass, email];
+
+      db.query(query, params, (err) => {
+        if (err)
+          return res
+            .status(500)
+            .json({ message: "Error updating user", error: err });
+
+        db.query(
+          "SELECT email FROM users WHERE email = ?",
+          [email],
+          (err, updatedUsers) => {
+            if (err)
+              return res
+                .status(500)
+                .json({ message: "Error fetching updated user", error: err });
+
+            res.json({
+              message: "Password updated successfully",
+              user: updatedUsers[0],
+            });
+          }
+        );
+      });
+    };
+
+    if (password) {
+      bcrypt.genSalt(10, (err, salt) => {
+        if (err) throw err;
+        bcrypt.hash(password, salt, (err, hashedPass) => {
+          if (err) throw err;
+          updateUser(hashedPass);
+        });
+      });
+    } else {
+      updateUser();
+    }
+  });
+});
+
 router.delete("/:email", (req, res) => {
   const { email } = req.params;
 

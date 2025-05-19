@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import classes from "./forgotPassword.module.css";
+import hidePassword from "../../assets/img/hide_password_eye.png";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -80,7 +81,7 @@ function ForgotPassword() {
                 placeholder="Enter new password"
               />
               <img
-                src="../../assets/img/hide_password_eye.png"
+                src={hidePassword}
                 alt="Toggle password visibility"
                 onClick={() => setShowPassword1(!showPassword1)}
                 className={classes.passwordIcon}
@@ -103,7 +104,7 @@ function ForgotPassword() {
                 placeholder="Confirm new password"
               />
               <img
-                src="../../assets/img/hide_password_eye.png"
+                src={hidePassword}
                 alt="Toggle password visibility"
                 onClick={() => setShowPassword2(!showPassword2)}
                 className={classes.passwordIcon}

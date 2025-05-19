@@ -1,0 +1,158 @@
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  padding: 2rem;
+  background-color: #f8f9fa;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 450px;
+  padding: 2.5rem;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.loginCard:hover {
+  transform: translateY(-5px);
+}
+
+.loginTitle {
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+  font-size: 2rem;
+  text-align: center;
+  font-weight: 600;
+  position: relative;
+  letter-spacing: 2px;
+}
+
+.loginTitle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background-color: #ff6b6b;
+  border-radius: 2px;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formLabel {
+  font-weight: 500;
+  color: #34495e;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+}
+
+.formInput {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e1e8ed;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: #ffffff;
+  color: #2c3e50;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.1);
+}
+
+.formInput::placeholder {
+  color: #95a5a6;
+}
+
+.noSpinner::-webkit-outer-spin-button,
+.noSpinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.noSpinner {
+  -moz-appearance: textfield;
+}
+
+.passwordContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordIcon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.passwordIcon:hover {
+  opacity: 1;
+}
+
+.formActions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.loginButton {
+  padding: 14px 30px;
+  background-color: #ff6b6b;
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.loginButton:hover {
+  background-color: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+}
+
+.forgotButton {
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.forgotButton:hover {
+  color: #ff6b6b;
+}

@@ -1,0 +1,101 @@
+/* Outer wrapper to ensure proper grid behavior */
+.cardWrapper {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Main product layout */
+.fullProduct {
+  display: flex;
+  flex-direction: column; /* Stack by default */
+  gap: 1rem;
+  padding: 1rem;
+  box-sizing: border-box;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+/* Switch to horizontal layout on larger screens */
+@media (min-width: 768px) {
+  .fullProduct {
+    flex-direction: row;
+  }
+}
+
+/* Product image styling */
+.productImg {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Product info block */
+.productInfo {
+  flex: 1;
+}
+
+/* Text and element styling */
+.price {
+  font-size: 1.5rem;
+  color: #c59d5f;
+  margin-bottom: 1rem;
+}
+
+.description {
+  margin-bottom: 2rem;
+}
+
+.sizeSection,
+.quantitySection {
+  margin-bottom: 1.5rem;
+}
+
+.sizeOptions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sizeButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sizeButton:hover {
+  border-color: black;
+}
+
+.selected {
+  border-color: black;
+  background-color: #f0f0f0;
+}
+
+.quantityControl {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.quantityControl button {
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.2rem;
+  background: white;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.addToCart {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+}

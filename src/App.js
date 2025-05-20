@@ -8,7 +8,7 @@ function App() {
     <div className="App">
       <CartProvider>
         <BrowserRouter>
-          <MyRoutes />
+          <MyRoutes/>
         </BrowserRouter>
       </CartProvider>
     </div>

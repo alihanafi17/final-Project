@@ -13,10 +13,11 @@ function ProductPage({ products }) {
 
   useEffect(() => {
     if (products && products.length > 0) {
-      const foundProduct = products.find(product => 
-        String(product.product_id) === String(id) || 
-        String(product._id) === String(id) || 
-        String(product.id) === String(id)
+      const foundProduct = products.find(
+        (product) =>
+          String(product.product_id) === String(id) ||
+          String(product._id) === String(id) ||
+          String(product.id) === String(id)
       );
       setProductData(foundProduct);
     }
@@ -47,9 +48,9 @@ function ProductPage({ products }) {
 
   return (
     <div className={classes.fullProduct}>
-      <img 
-        src={productData.image || mensImage} 
-        alt={productData.name} 
+      <img
+        src={productData.image || mensImage}
+        alt={productData.name}
         className={classes.productImg}
       />
       <div className={classes.productInfo}>
@@ -83,7 +84,9 @@ function ProductPage({ products }) {
           </div>
         </div>
 
-        <button className={classes.addToCart} onClick={handleAddToCart}>Add to Cart</button>
+        <button className={classes.addToCart} onClick={handleAddToCart}>
+          Add to Cart
+        </button>
       </div>
     </div>
   );

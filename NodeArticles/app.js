@@ -1,4 +1,5 @@
 const express = require("express");
+
 const cors = require("cors");
 const app = express();
 
@@ -6,6 +7,7 @@ const usersRoutes = require("./routes/users");
 const productsRoutes = require("./routes/products");
 const categoriesRoutes = require("./routes/categories");
 const ordersRoutes = require("./routes/orders");
+const serviceRoutes = require("./routes/service");
 const port = 8801;
 
 // Enable CORS for all routes
@@ -22,6 +24,7 @@ app.use("/users", usersRoutes);
 app.use("/products", productsRoutes);
 app.use("/categories", categoriesRoutes);
 app.use("/orders", ordersRoutes);
+app.use("/service", serviceRoutes);
 app.use((err, req, res, next) => {
   console.error(err); // Log error
   res.status(500).json({

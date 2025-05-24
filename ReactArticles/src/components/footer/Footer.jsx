@@ -50,10 +50,10 @@ function Footer() {
           <h4 className={classes.footer__subtitle}>Help</h4>
           <ul className={classes.footer__links}>
             <li>
-              <Link to="/">Customer Service</Link>
+              <Link to="/customerService">Customer Service</Link>
             </li>
             <li>
-              <Link to="/">My Account</Link>
+              <Link to="/login">My Account</Link>
             </li>
           </ul>
         </div>

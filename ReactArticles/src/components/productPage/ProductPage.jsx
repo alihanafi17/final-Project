@@ -2,14 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import mensImage from "../../assets/img/mensCollectionCover.jpg";
 import classes from "./productPage.module.css";
-import { useCart } from "../../context/CartContext";
 
 function ProductPage({ products }) {
   const { id } = useParams();
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [productData, setProductData] = useState(null);
-  const { addToCart } = useCart();
 
   useEffect(() => {
     if (products && products.length > 0) {
@@ -29,15 +27,6 @@ function ProductPage({ products }) {
 
   const handleQuantityChange = (amount) => {
     setQuantity((prev) => Math.max(1, prev + amount));
-  };
-
-  const handleAddToCart = () => {
-    if (!selectedSize) {
-      alert("Please select a size");
-      return;
-    }
-    addToCart(productData, selectedSize, quantity);
-    alert("Product added to cart!");
   };
 
   const sizes = ["XS", "S", "M", "L"];
@@ -84,9 +73,7 @@ function ProductPage({ products }) {
           </div>
         </div>
 
-        <button className={classes.addToCart} onClick={handleAddToCart}>
-          Add to Cart
-        </button>
+        <button className={classes.addToCart}>Add to Cart</button>
       </div>
     </div>
   );

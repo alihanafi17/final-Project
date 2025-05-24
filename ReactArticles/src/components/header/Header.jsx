@@ -17,7 +17,7 @@ function Header() {
           <div className={classes.logo}>
             <Link to="/">
               <img src={logo} alt="logo" />
-              <span>Nuvel</span>
+              {/* <span>Nuvel</span> */}
             </Link>
           </div>
 

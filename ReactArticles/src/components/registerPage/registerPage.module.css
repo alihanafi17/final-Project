@@ -1,4 +1,4 @@
-.loginContainer {
+.registerContainer {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -8,7 +8,7 @@
   font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
-.loginCard {
+.registerCard {
   width: 100%;
   max-width: 450px;
   padding: 2.5rem;
@@ -18,11 +18,11 @@
   transition: transform 0.3s ease;
 }
 
-.loginCard:hover {
+.registerCard:hover {
   transform: translateY(-5px);
 }
 
-.loginTitle {
+.registerTitle {
   margin-bottom: 1.5rem;
   color: #2c3e50;
   font-size: 2rem;
@@ -32,7 +32,7 @@
   letter-spacing: 2px;
 }
 
-.loginTitle::after {
+.registerTitle::after {
   content: "";
   position: absolute;
   left: 50%;
@@ -44,7 +44,7 @@
   border-radius: 2px;
 }
 
-.loginForm {
+.registerForm {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -83,16 +83,6 @@
   color: #95a5a6;
 }
 
-.noSpinner::-webkit-outer-spin-button,
-.noSpinner::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.noSpinner {
-  -moz-appearance: textfield;
-}
-
 .passwordContainer {
   position: relative;
   display: flex;
@@ -122,7 +112,7 @@
   margin-top: 1rem;
 }
 
-.loginButton {
+.registerButton {
   padding: 14px 30px;
   background-color: #ff6b6b;
   color: #ffffff;
@@ -136,12 +126,23 @@
   letter-spacing: 1px;
 }
 
-.loginButton:hover {
+.registerButton:hover {
   background-color: #ff5252;
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
 }
 
+.errorMessage {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  background-color: #ffe5e5;
+  color: #d63031;
+  border: 1px solid #fab1b1;
+  text-align: center;
+  font-size: 0.9rem;
+  animation: fadeIn 0.3s ease;
+}
 .forgotButton {
   background: none;
   border: none;
@@ -152,7 +153,32 @@
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-
 .forgotButton:hover {
   color: #ff6b6b;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 576px) {
+  .registerCard {
+    padding: 1.5rem;
+  }
+
+  .registerTitle {
+    font-size: 1.75rem;
+  }
+
+  .formInput {
+    padding: 0.6rem 0.8rem;
+  }
 }

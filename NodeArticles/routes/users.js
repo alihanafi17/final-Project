@@ -12,33 +12,50 @@ router.get("/", (req, res) => {
   });
 });
 
+const jwt = require("jsonwebtoken"); // add this at the top
+
+// Secret key (store in .env in real apps)
+const JWT_SECRET = "your_secret_key"; // use process.env.JWT_SECRET in production
+
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
 
   db.query("SELECT * FROM users WHERE email = ?", [email], (err, results) => {
-    if (err) throw err;
+    if (err) return res.status(500).json({ error: err.message });
 
     if (results.length === 0) {
-      return res.json({ success: false, message: "Invalid email or password" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid email or password" });
     }
 
     const user = results[0];
 
     bcrypt.compare(password, user.password, (err, match) => {
-      if (err) throw err;
+      if (err) return res.status(500).json({ error: err.message });
 
       if (!match) {
-        return res.json({
-          success: false,
-          message: "Invalid email or password",
-        });
+        return res
+          .status(401)
+          .json({ success: false, message: "Invalid email or password" });
       }
+
+      const token = jwt.sign(
+        { email: user.email, role: user.role },
+        JWT_SECRET,  // Changed from SECRET_KEY to JWT_SECRET
+        { expiresIn: "1d" }
+      );
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 24 * 60 * 60 * 1000,
+      });
 
       res.json({
         success: true,
         message: "Login successful!",
         user: {
-          id: user.id,
           name: user.name,
           email: user.email,
           role: user.role,
@@ -46,6 +63,28 @@ router.post("/login", (req, res) => {
       });
     });
   });
+});
+
+router.post("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.json({ message: "Logged out" });
+});
+
+router.get("/check-auth", (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ loggedIn: false });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);  // Changed from SECRET_KEY to JWT_SECRET
+    res.json({ loggedIn: true, user: decoded });
+  } catch (err) {
+    res
+      .status(403)
+      .json({ loggedIn: false, message: "Invalid or expired token" });
+  }
 });
 
 router.get("/:email", (req, res) => {

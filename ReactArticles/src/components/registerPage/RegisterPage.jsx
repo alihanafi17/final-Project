@@ -10,10 +10,12 @@ function RegisterPage() {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
       const response = await fetch("http://localhost:8801/users", {
@@ -25,31 +27,31 @@ function RegisterPage() {
           name,
           address,
           phone,
-          role: "user", // default role
+          role: "user",
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        console.log(data.success);
-        alert("Registration successful!");
         navigate("/login");
       } else {
-        alert("Registration failed");
+        setError(data.message || "Registration failed. Please try again.");
       }
     } catch (error) {
       console.error("Registration error:", error);
-      alert("An error occurred during registration.");
+      setError("Failed to connect to server. Please try again later.");
     }
   };
 
   return (
-    <div className={classes.loginContainer}>
-      <div className={classes.loginCard}>
-        <h2 className={classes.loginTitle}>Register</h2>
+    <div className={classes.registerContainer}>
+      <div className={classes.registerCard}>
+        <h2 className={classes.registerTitle}>Register</h2>
 
-        <form onSubmit={handleSubmit} className={classes.loginForm}>
+        {error && <div className={classes.errorMessage}>{error}</div>}
+
+        <form onSubmit={handleSubmit} className={classes.registerForm}>
           <div className={classes.formGroup}>
             <label htmlFor="name" className={classes.formLabel}>
               Name
@@ -134,7 +136,7 @@ function RegisterPage() {
           </div>
 
           <div className={classes.formActions}>
-            <button type="submit" className={classes.loginButton}>
+            <button type="submit" className={classes.registerButton}>
               Register
             </button>
             <button

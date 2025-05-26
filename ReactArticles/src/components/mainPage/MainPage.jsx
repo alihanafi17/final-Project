@@ -19,7 +19,7 @@ function MainPage() {
 
   const navigate = useNavigate();
 
-  // const [msg, setMsg] = useState("");
+  
 
   const fetchData = () => {
     axios
@@ -33,25 +33,7 @@ function MainPage() {
       });
   };
 
-  // const handleDelete = (post) => {
-  //   if (window.confirm(`Are you sure you want to delete post: ${post.name}`)) {
-  //     axios
-  //       .delete(`/users/${post.email}`)
-  //       .then((res) => {
-  //         console.log("Post deleted:", res.data); // Article deleted
-  //         // After deletion, update the list of articles
-  //         setUsers(users.filter((user) => user.id !== post.id));
-  //         setMsg("user was deleted");
-  //         // Clear the message after 1 second
-  //         setTimeout(() => {
-  //           setMsg(""); // Clear the message after 1 second
-  //         }, 2000); // 1000 ms = 1 second
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error:", error);
-  //       });
-  //   }
-  // };
+  
   return (
     <div className={classes.main}>
       <section className={classes.section1}>

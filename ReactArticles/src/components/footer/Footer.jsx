@@ -1,8 +1,11 @@
 import React from "react";
 import classes from "./footer.module.css";
 import { Link } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 
 function Footer() {
+  const { user } = useAuth();
+
   return (
     <footer className={classes.footer}>
       <div className={classes.footer__container}>
@@ -53,7 +56,9 @@ function Footer() {
               <Link to="/customerService">Customer Service</Link>
             </li>
             <li>
-              <Link to="/login">My Account</Link>
+              <Link to={user ? (user.role === "admin" ? "/adminPage" : `/userPage/${user.email}`) : "/login"}>
+                My Account
+              </Link>
             </li>
           </ul>
         </div>

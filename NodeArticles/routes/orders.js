@@ -30,6 +30,20 @@ router.get("/:id", (req, res) => {
     res.json(results);
   });
 });
+router.get("/:email", (req, res) => {
+  const { email } = req.params;
+
+  const query = "SELECT * FROM orders WHERE email = ?";
+
+  db.query(query, [email], (err, results) => {
+    if (err) {
+      res.status(500).send(err);
+      return;
+    }
+
+    res.json(results);
+  });
+});
 
 router.post("/", (req, res) => {
   const { total_amount, email, status } = req.body;

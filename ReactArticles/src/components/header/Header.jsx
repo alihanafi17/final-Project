@@ -1,13 +1,25 @@
 import React, { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import logo from "../../assets/img/site-logo.png";
 import classes from "./header.module.css";
+import { useAuth } from "../AuthContext";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   return (
@@ -17,7 +29,6 @@ function Header() {
           <div className={classes.logo}>
             <Link to="/">
               <img src={logo} alt="logo" />
-              {/* <span>Nuvel</span> */}
             </Link>
           </div>
 
@@ -69,9 +80,30 @@ function Header() {
             <a href="#" className={classes.header__action_icon}>
               <i className="fas fa-search"></i>
             </a>
-            <Link to="/login" className={classes.header__action_icon}>
-              <i className="fas fa-user"></i>
-            </Link>
+
+            {user ? (
+              <>
+                <Link 
+                  to={user.role === "admin" ? "/adminPage" : `/userPage/${user.email}`} 
+                  className={classes.header__action_icon}
+                >
+                  <i className="fas fa-user"></i>
+                </Link>
+                <Link
+                  onClick={handleLogout}
+                  to="#"
+                  className={classes.header__action_icon}
+                  title="Logout"
+                >
+                  <i className="fas fa-sign-out-alt"></i>
+                </Link>
+              </>
+            ) : (
+              <Link to="/login" className={classes.header__action_icon}>
+                <i className="fas fa-user"></i>
+              </Link>
+            )}
+
             <Link to="/cartPage" className={classes.header__action_icon}>
               <i className="fas fa-shopping-bag"></i>
               <span className={classes.cart_count}>0</span>

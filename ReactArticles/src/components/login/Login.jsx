@@ -2,35 +2,28 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import classes from "./login.module.css";
 import hidePassword from "../../assets/img/hide_password_eye.png";
+import { useAuth } from "../AuthContext";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
-      const response = await fetch("http://localhost:8801/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        alert("Login successful!");
-        const role = data.user.role;
-        navigate(role === "admin" ? "/adminPage" : "/userPage");
-      } else {
-        alert("Invalid email or password.");
+      const result = await login(email, password);
+      if (!result.success) {
+        setError(result.message || "Invalid login");
       }
     } catch (err) {
       console.error("Login error:", err);
-      alert("Failed to connect to server.");
+      setError("Failed to connect to server.");
     }
   };
 
@@ -38,6 +31,8 @@ function Login() {
     <div className={classes.loginContainer}>
       <div className={classes.loginCard}>
         <h2 className={classes.loginTitle}>Login</h2>
+
+        {error && <div className={classes.errorMessage}>{error}</div>}
 
         <form onSubmit={handleSubmit} className={classes.loginForm}>
           <div className={classes.formGroup}>

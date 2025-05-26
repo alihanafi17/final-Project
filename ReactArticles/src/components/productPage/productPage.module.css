@@ -99,3 +99,22 @@
   border: none;
   cursor: pointer;
 }
+
+.sizeButton {
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+  border: 1px solid #aaa;
+  background: white;
+  cursor: pointer;
+}
+
+.selected {
+  background: black;
+  color: white;
+  border-color: black;
+}
+
+.quantityInput {
+  width: 50px;
+  text-align: center;
+}

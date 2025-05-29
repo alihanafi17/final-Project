@@ -8,13 +8,15 @@
 .fullProduct {
   display: flex;
   flex-direction: column; /* Stack by default */
-  gap: 1rem;
-  padding: 1rem;
+  gap: 2rem;
+  padding: 2rem;
   box-sizing: border-box;
   width: 100%;
   background-color: #fff;
-  border: 1px solid #eee;
-  border-radius: 8px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 /* Switch to horizontal layout on larger screens */
@@ -27,36 +29,81 @@
 /* Product image styling */
 .productImg {
   width: 100%;
-  max-width: 300px;
+  max-width: 450px;
   height: auto;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.productImg:hover {
+  transform: scale(1.02);
 }
 
 /* Product info block */
 .productInfo {
   flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 /* Text and element styling */
+.productInfo h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-family: 'Poppins', sans-serif;
+  color: #222;
+}
+
 .price {
-  font-size: 1.5rem;
-  color: #c59d5f;
-  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  color: #f97316;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.price::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background-color: #f9731650;
 }
 
 .description {
   margin-bottom: 2rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #555;
+  max-width: 90%;
 }
 
 .sizeSection,
 .quantitySection {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sizeSection h4,
+.quantitySection h4 {
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  color: #333;
 }
 
 .sizeOptions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .sizeButton {
@@ -80,41 +127,103 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  background-color: #f9f9f9;
+  padding: 0.5rem;
+  border-radius: 30px;
+  width: fit-content;
 }
 
 .quantityControl button {
-  width: 2rem;
-  height: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   font-size: 1.2rem;
   background: white;
-  border: 1px solid #ccc;
+  border: none;
   cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.quantityControl button:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .addToCart {
-  margin-top: 1.5rem;
-  padding: 0.75rem 1.5rem;
+  margin-top: 2rem;
+  padding: 1rem 2rem;
   background: black;
   color: white;
   border: none;
   cursor: pointer;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  max-width: 300px;
+}
+
+.addToCart:hover {
+  background-color: #333;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.addToCart:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .sizeButton {
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   margin: 0.25rem;
-  border: 1px solid #aaa;
+  border: 1px solid #ddd;
   background: white;
   cursor: pointer;
+  border-radius: 30px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 50px;
+  text-align: center;
 }
 
 .selected {
   background: black;
   color: white;
   border-color: black;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 .quantityInput {
   width: 50px;
   text-align: center;
+  border: none;
+  background-color: transparent;
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+}
+
+/* Add responsive improvements */
+@media (min-width: 768px) {
+  .fullProduct {
+    padding: 3rem;
+  }
+  
+  .productInfo {
+    padding-left: 2rem;
+  }
 }

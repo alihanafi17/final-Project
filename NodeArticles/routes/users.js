@@ -42,7 +42,7 @@ router.post("/login", (req, res) => {
 
       const token = jwt.sign(
         { email: user.email, role: user.role },
-        JWT_SECRET,  // Changed from SECRET_KEY to JWT_SECRET
+        JWT_SECRET, // Changed from SECRET_KEY to JWT_SECRET
         { expiresIn: "1d" }
       );
 
@@ -59,6 +59,8 @@ router.post("/login", (req, res) => {
           name: user.name,
           email: user.email,
           role: user.role,
+          address: user.address,
+          phone: user.phone
         },
       });
     });
@@ -78,8 +80,21 @@ router.get("/check-auth", (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);  // Changed from SECRET_KEY to JWT_SECRET
-    res.json({ loggedIn: true, user: decoded });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const email = decoded.email;
+
+    const query =
+      "SELECT name, email, address, phone FROM users WHERE email = ?";
+    db.query(query, [email], (err, results) => {
+      if (err || results.length === 0) {
+        return res
+          .status(403)
+          .json({ loggedIn: false, message: "User not found" });
+      }
+
+      const user = results[0];
+      res.json({ loggedIn: true, user });
+    });
   } catch (err) {
     res
       .status(403)
@@ -181,7 +196,7 @@ router.post("/", (req, res) => {
 
 router.put("/:email", (req, res) => {
   const { email } = req.params;
-  const { name, password, address, role, phone } = req.body;
+  const { name, address, phone } = req.body;
 
   db.query("SELECT id FROM users WHERE email = ?", [email], (err, users) => {
     if (err) throw err;
@@ -191,8 +206,8 @@ router.put("/:email", (req, res) => {
     }
 
     const updateUser = (hashedPass = null) => {
-      let query = "UPDATE users SET name = ?, address = ?, role = ?, phone = ?";
-      const params = [name, address, role, phone];
+      let query = "UPDATE users SET name = ?, address = ?, phone = ?";
+      const params = [name, address, phone];
 
       if (hashedPass) {
         query += ", password = ?";
@@ -219,17 +234,7 @@ router.put("/:email", (req, res) => {
       });
     };
 
-    if (password) {
-      bcrypt.genSalt(10, (err, salt) => {
-        if (err) throw err;
-        bcrypt.hash(password, salt, (err, hashedPass) => {
-          if (err) throw err;
-          updateUser(hashedPass);
-        });
-      });
-    } else {
-      updateUser();
-    }
+    updateUser();
   });
 });
 

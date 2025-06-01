@@ -58,11 +58,11 @@ router.put("/:product_id", (req, res) => {
   );
 });
 
-router.delete("/:id", (req, res) => {
-  const { id } = req.params;
+router.delete("/:product_id", (req, res) => {
+  const { product_id } = req.params;
   const query = "DELETE FROM products WHERE product_id = ?";
 
-  db.query(query, [id], (err, results) => {
+  db.query(query, [product_id], (err, results) => {
     if (err) {
       res.status(500).send(err);
       return;

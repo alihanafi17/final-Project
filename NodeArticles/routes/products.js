@@ -17,34 +17,36 @@ router.get("/", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  const { size, quantity, price, color, category_id, description } = req.body;
+  const { id, size, color, name, description, category_id, price, quantity } =
+    req.body;
   const query =
-    "INSERT INTO users (size, quantity, price, color, category_id, description) VALUES (?, ?, ?, ?, ?, ?);";
+    "INSERT INTO products (id, size, color, name, description, category_id, price, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 
   db.query(
     query,
-    [size, quantity, price, color, category_id, description],
+    [id, size, color, name, description, category_id, price, quantity],
     (err, results) => {
       if (err) {
         res.status(500).send(err);
         return;
       }
-      res.json({ message: "User added!", id: results.insertId });
+      res.json({ message: "Product added!" });
     }
   );
 });
 
-router.put("/:id", (req, res) => {
-  const { id } = req.params;
+router.put("/:product_id", (req, res) => {
+  const { product_id } = req.params;
 
-  const { size, quantity, price, color, category_id, description } = req.body;
+  const { size, color, name, description, category_id, price, quantity } =
+    req.body;
 
   const query =
-    "UPDATE users SET size = ?, quantity = ?, price = ?, color = ?, category_id = ?, description = ? WHERE id = ?";
+    "UPDATE products SET size = ?, color = ?, name = ?, description = ?, category_id = ?, price = ?, quantity = ? WHERE product_id = ?";
 
   db.query(
     query,
-    [id, size, quantity, price, color, category_id, description],
+    [size, color, name, description, category_id, price, quantity, product_id],
     (err, results) => {
       if (err) {
         res.status(500).send(err);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import classes from "./registerPage.module.css";
 import hidePassword from "../../assets/img/hide_password_eye.png";
@@ -11,7 +11,25 @@ function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [notification, setNotification] = useState({ show: false, message: "", type: "" });
   const navigate = useNavigate();
+  
+  // Function to show notifications
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type });
+    
+    // Auto-hide notification after 3 seconds
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "" });
+    }, 3000);
+  };
+  
+  // Clear notification when component unmounts
+  useEffect(() => {
+    return () => {
+      setNotification({ show: false, message: "", type: "" });
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +52,11 @@ function RegisterPage() {
       const data = await response.json();
 
       if (data.success) {
-        navigate("/login");
+        showNotification("Registration successful! Redirecting to login...", "success");
+        // Delay navigation to allow user to see the success message
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       } else {
         setError(data.message || "Registration failed. Please try again.");
       }
@@ -46,6 +68,20 @@ function RegisterPage() {
 
   return (
     <div className={classes.registerContainer}>
+      {notification.show && (
+        <div className={`${classes.notification} ${classes[notification.type]}`}>
+          <div className={classes.notificationContent}>
+            <span className={classes.notificationMessage}>{notification.message}</span>
+            <button 
+              className={classes.notificationClose} 
+              onClick={() => setNotification({ show: false, message: "", type: "" })}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className={classes.registerCard}>
         <h2 className={classes.registerTitle}>Register</h2>
 

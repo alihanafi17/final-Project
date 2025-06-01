@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
+import styles from "./userPage.module.css";
 
 function UserPage() {
   const { user } = useAuth();
@@ -8,6 +9,17 @@ function UserPage() {
   const [Name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
+  const [notification, setNotification] = useState({ show: false, message: "", type: "" });
+  
+  // Function to show notifications instead of alerts
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type });
+    
+    // Auto-hide notification after 3 seconds
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "" });
+    }, 3000);
+  };
 
   useEffect(() => {
     if (user) {
@@ -23,6 +35,8 @@ function UserPage() {
     return <Navigate to="/login" />;
   }
   
+  // Function is already defined above
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -32,8 +46,9 @@ function UserPage() {
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: Name 
-            ,address: address,
+          body: JSON.stringify({ 
+            name: Name,
+            address: address,
             phone: phone
           }),
         }
@@ -42,45 +57,85 @@ function UserPage() {
       const data = await response.json();
 
       if (response.status === 404) {
-        alert("User not found");
+        showNotification("User not found", "error");
       } else if (response.ok) {
-        alert("User updated successfully!");
+        showNotification("User updated successfully!", "success");
         navigate(`/userPage/${user.email}`);
       } else {
-        alert(data.message || "User update failed");
+        showNotification(data.message || "User update failed", "error");
       }
     } catch (error) {
       console.error("User update error:", error);
-      alert("An error occurred during user update.");
+      showNotification("An error occurred during user update.", "error");
     }
   };
 
   return (
-    <div>
-      <h1>Welcome to user page</h1>
-      <div>
-        <form onSubmit={handleSubmit}>
-          <label>Name</label>
-          <input
-            type="text"
-            value={Name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <label>Address</label>
-          <input
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-          <label>Phone</label>
-          <input
-            type="text"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-          <button type="submit">Update</button>
-        </form>
+    <div className={styles.userPageContainer}>
+      {notification.show && (
+        <div className={`${styles.notification} ${styles[notification.type]}`}>
+          <div className={styles.notificationContent}>
+            <span className={styles.notificationMessage}>{notification.message}</span>
+            <button 
+              className={styles.notificationClose} 
+              onClick={() => setNotification({ show: false, message: "", type: "" })}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+      <h1 className={styles.pageTitle}>My Account</h1>
+      
+      <div className={styles.userPageContent}>
+        {/* Profile Section */}
+        <section className={styles.profileSection}>
+          <h2 className={styles.sectionTitle}>Profile Information</h2>
+          <div className={styles.profileCard}>
+            <form onSubmit={handleSubmit} className={styles.profileForm}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Name</label>
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  value={Name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Address</label>
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Phone</label>
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+              
+              <button type="submit" className={styles.updateButton}>Update Profile</button>
+            </form>
+          </div>
+        </section>
         
+        {/* Orders Section */}
+        <section className={styles.ordersSection}>
+          <h2 className={styles.sectionTitle}>My Orders</h2>
+          <div className={styles.ordersCard}>
+            <p className={styles.noOrders}>You don't have any orders yet.</p>
+            {/* Order history will be displayed here */}
+          </div>
+        </section>
       </div>
     </div>
   );

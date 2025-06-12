@@ -1,0 +1,430 @@
+/* Admin Container */
+.adminContainer {
+  display: flex;
+  flex-direction: column;
+  background-color: antiquewhite;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding-bottom: 2rem;
+}
+
+/* Message Styles */
+.errorMessage,
+.successMessage {
+  margin: 0 auto 20px;
+  padding: 12px 20px;
+  border-radius: 5px;
+  width: 90%;
+  max-width: 1200px;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.errorMessage {
+  background-color: #ffebee;
+  border-left: 4px solid #f44336;
+  color: #d32f2f;
+}
+
+.successMessage {
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  color: #2e7d32;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #ff8000 0%, chocolate 100%);
+  color: white;
+  padding: 1.5rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.header p {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Content Container */
+.contentContainer {
+  display: flex;
+  padding: 0 2rem 2rem;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Category Sidebar */
+.categorySidebar {
+  width: 280px;
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+}
+
+.categorySidebar h2 {
+  margin-top: 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e9ecef;
+  font-size: 1.4rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.categoryList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.categoryItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.categoryButton {
+  padding: 10px 15px;
+  background-color: #f8f9fa;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  flex-grow: 1;
+  font-weight: 500;
+  color: #495057;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.categoryButton:hover {
+  background-color: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.categoryButton.active {
+  background: linear-gradient(135deg, #ff8000 0%, chocolate 100%);
+  color: white;
+  box-shadow: 0 4px 8px rgba(255, 128, 0, 0.3);
+}
+
+.categoryItem .deleteButton {
+  width: 28px;
+  height: 28px;
+  margin-left: 8px;
+  background: linear-gradient(135deg, #ff4d4f 0%, #c82333 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.25);
+}
+
+.categoryItem .deleteButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.addButton {
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #ff8000 0%, chocolate 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 10px 16px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(255, 128, 0, 0.25);
+}
+
+.addButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(255, 128, 0, 0.3);
+}
+
+/* Main Content */
+.mainContent {
+  flex: 1;
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+  min-width: 300px;
+  transition: all 0.3s ease;
+}
+
+/* Welcome Message */
+.welcomeMessage {
+  text-align: center;
+  padding: 2rem;
+}
+
+.welcomeMessage h2 {
+  margin-bottom: 1rem;
+  color: #343a40;
+}
+
+.welcomeMessage p {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+/* Form Container */
+.formContainer {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.formContainer h2 {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.formGroup textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.formRow {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.formActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.submitButton,
+.cancelButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.submitButton {
+  background: linear-gradient(135deg, #ff8000 0%, chocolate 100%);
+  color: white;
+  box-shadow: 0 4px 8px rgba(255, 128, 0, 0.25);
+}
+
+.submitButton:hover {
+  background: linear-gradient(135deg, chocolate 0%, #d26900 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(255, 128, 0, 0.3);
+}
+
+.cancelButton {
+  background-color: #6c757d;
+  color: white;
+}
+
+.cancelButton:hover {
+  background-color: #5a6268;
+}
+
+/* Products Container */
+.productsContainer {
+  width: 100%;
+}
+
+.categoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.addProductButton {
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #ff8000 0%, chocolate 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(255, 128, 0, 0.25);
+}
+
+.addProductButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 128, 0, 0.3);
+}
+
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.productCard {
+  border: none;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background-color: #fff;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  height: auto;
+}
+
+.productCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #ff8000, chocolate);
+  opacity: 0.8;
+}
+
+.productCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.productCard h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.productDescription {
+  color: #6c757d;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.productDetails {
+  margin-bottom: 1rem;
+}
+
+.productDetails p {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+}
+
+.productActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.editButton,
+.deleteButton {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.editButton {
+  background: linear-gradient(135deg, #ff8000 0%, chocolate 100%);
+  color: white;
+  box-shadow: 0 4px 8px rgba(255, 128, 0, 0.25);
+}
+
+.editButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(255, 128, 0, 0.3);
+}
+
+.deleteButton {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.25);
+  border-radius: 8px;
+}
+
+.deleteButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(220, 53, 69, 0.3);
+}
+
+.noProducts {
+  text-align: center;
+  color: #6c757d;
+  padding: 2rem;
+  font-size: 1.1rem;
+}

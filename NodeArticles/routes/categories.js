@@ -60,10 +60,12 @@ router.post("/", (req, res) => {
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
 
+  // First check if the category exists
   const checkQuery = "SELECT * FROM categories WHERE category_id = ?";
   db.query(checkQuery, [id], (err, results) => {
     if (err) {
-      res.status(500).send(err);
+      console.error("Error checking category:", err);
+      res.status(500).json({ message: "Server error while checking category" });
       return;
     }
 
@@ -71,13 +73,25 @@ router.delete("/:id", (req, res) => {
       return res.status(404).json({ message: "Category not found." });
     }
 
-    const deleteQuery = "DELETE FROM categories WHERE category_id = ?";
-    db.query(deleteQuery, [id], (err, results) => {
+    // First delete all products in this category
+    const deleteProductsQuery = "DELETE FROM products WHERE category_id = ?";
+    db.query(deleteProductsQuery, [id], (err, productResults) => {
       if (err) {
-        res.status(500).send(err);
+        console.error("Error deleting products:", err);
+        res.status(500).json({ message: "Server error while deleting products" });
         return;
       }
-      res.json({ message: "Category deleted!" });
+      
+      // Now that products are deleted, delete the category
+      const deleteQuery = "DELETE FROM categories WHERE category_id = ?";
+      db.query(deleteQuery, [id], (err, results) => {
+        if (err) {
+          console.error("Error deleting category:", err);
+          res.status(500).json({ message: "Server error while deleting category" });
+          return;
+        }
+        res.json({ message: "Category and all its products deleted!" });
+      });
     });
   });
 });

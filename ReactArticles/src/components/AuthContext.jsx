@@ -4,13 +4,26 @@ import { useNavigate } from 'react-router-dom';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  // Initialize user state from localStorage if available
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     checkAuthStatus();
   }, []);
+
+  // Save user to localStorage whenever it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
 
   const checkAuthStatus = async () => {
     try {
@@ -61,10 +74,16 @@ export function AuthProvider({ children }) {
         method: 'POST',
         credentials: 'include'
       });
+      // Clear user from state and localStorage
       setUser(null);
+      localStorage.removeItem('user');
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
+      // Still clear local data even if server request fails
+      setUser(null);
+      localStorage.removeItem('user');
+      navigate('/login');
     }
   };
 

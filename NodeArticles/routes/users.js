@@ -84,7 +84,7 @@ router.get("/check-auth", (req, res) => {
     const email = decoded.email;
 
     const query =
-      "SELECT name, email, address, phone FROM users WHERE email = ?";
+      "SELECT name, email, address, phone, role FROM users WHERE email = ?";
     db.query(query, [email], (err, results) => {
       if (err || results.length === 0) {
         return res

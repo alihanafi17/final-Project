@@ -5,9 +5,22 @@ const dbSingleton = require("../dbSingleton");
 const db = dbSingleton.getConnection();
 
 router.get("/", (req, res) => {
-  const query = "SELECT * FROM products";
+  const query = "SELECT * FROM products GROUP BY id";
 
   db.query(query, (err, results) => {
+    if (err) {
+      res.status(500).send(err);
+      return;
+    }
+    res.json(results);
+  });
+});
+
+router.get("/:id", (req, res) => {
+  const { id } = req.params;
+  const query = "SELECT * FROM products WHERE id=?";
+
+  db.query(query, [id], (err, results) => {
     if (err) {
       res.status(500).send(err);
       return;

@@ -77,9 +77,9 @@ function Header() {
           </nav>
 
           <div className={classes.header__actions}>
-            <a href="#" className={classes.header__action_icon}>
+            <Link to="/search" className={classes.header__action_icon} title="Search">
               <i className="fas fa-search"></i>
-            </a>
+            </Link>
 
             {user ? (
               <>

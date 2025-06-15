@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import MainPage from "./mainPage/MainPage";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Fuse from "fuse.js";
 import { AuthProvider } from "./AuthContext";
 
 import Header from "./header/Header";
@@ -18,6 +19,8 @@ import UserPage from "./userPage/UserPage";
 import RegisterPage from "./registerPage/RegisterPage";
 import ForgotPassword from "./forgotPassword/ForgotPassword";
 import CustomerService from "./customerService/CustomerService";
+import CartPage from "./cartPage/CartPage";
+import SearchPage from "./searchPage/SearchPage";
 
 function MyRoutes() {
   const [products, setProducts] = useState([]);
@@ -45,6 +48,11 @@ function MyRoutes() {
       .get("/products")
       .then((res) => {
         setProducts(res.data);
+        window.__PRODUCTS__ = res.data; // expose for search
+        window.__FUSE__ = new Fuse(res.data, {
+          keys: ["name"],
+          threshold: 0.3,
+        });
         console.log(res.data);
       })
       .catch((error) => {
@@ -67,6 +75,8 @@ function MyRoutes() {
         <Route path="/registerPage" element={<RegisterPage />} />
         <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/customerService" element={<CustomerService />} />
+        <Route path="/cartPage" element={<CartPage />} />
+        <Route path="/search" element={<SearchPage products={products} />} />
       </Routes>
       <Footer />
     </AuthProvider>

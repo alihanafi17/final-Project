@@ -8,8 +8,7 @@ function ProductShow({ product, featured = false, onClose }) {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [productData, setProductData] = useState("");
-
-  
+  const [currentId, setCurrentId] = useState("");
 
   useEffect(() => {
     if (showModal) {
@@ -58,7 +57,11 @@ function ProductShow({ product, featured = false, onClose }) {
           <div className={classes.info}>
             <h3 className={classes.name}>{product.name}</h3>
             <p className={classes.price}>${product.price}</p>
-            <button className={classes.cartBtn} onClick={handleAddToCart}>
+            <button
+              className={classes.cartBtn}
+              data={product.id}
+              onClick={handleAddToCart}
+            >
               Add to Cart
             </button>
           </div>
@@ -71,7 +74,8 @@ function ProductShow({ product, featured = false, onClose }) {
             <button className={classes.closeButton} onClick={handleCloseModal}>
               ×
             </button>
-            <ProductPage products={[product]} />
+            {/* {navigate(`/products/${product.id}`)} */}
+            <ProductPage />
           </div>
         </div>
       )}

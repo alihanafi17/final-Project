@@ -86,11 +86,13 @@ import mensImage from "../../assets/img/mensCollectionCover.jpg";
 import classes from "./productPage.module.css";
 import axios from "axios";
 
-function ProductPage({ products }) {
+function ProductPage() {
   const { id } = useParams();
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [productData, setProductData] = useState([]);
+  const [selectedColor, setSelectedColor] = useState("");
+  const [maxQuantity, setMaxQuantity] = useState(0);
 
   const fetchData = () => {
     axios
@@ -106,6 +108,14 @@ function ProductPage({ products }) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const maxQ = productData.filter(
+      (prod) => prod.size === selectedSize && prod.color === selectedColor
+    );
+    maxQ.length !== 0 && setMaxQuantity(maxQ[0].quantity);
+    console.log(maxQ);
+  }, [selectedColor, selectedSize]);
 
   // useEffect(() => {
   //   if (products && products.length > 0) {
@@ -134,6 +144,8 @@ function ProductPage({ products }) {
     });
   };
 
+  const uniqueColors = [...new Set(productData.map((prod) => prod.color))];
+
   const sizes = ["XS", "S", "M", "L"];
 
   if (!productData) {
@@ -155,6 +167,27 @@ function ProductPage({ products }) {
           <p className={classes.description}>{productData[0].description}</p>
 
           <form onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="color-select">Choose a color: </label>
+              <select
+                id="color-select"
+                value={selectedColor}
+                onChange={(e) => setSelectedColor(e.target.value)}
+              >
+                <option value="">-- Select --</option>
+                {uniqueColors.map((color) => (
+                  <option key={color} value={color}>
+                    {color}
+                  </option>
+                ))}
+              </select>
+
+              {selectedColor && (
+                <p>
+                  You selected: <b>{selectedColor}</b>
+                </p>
+              )}
+            </div>
             {/* Size Selection */}
             <div className={classes.sizeSection}>
               <h4>Size</h4>
@@ -171,46 +204,88 @@ function ProductPage({ products }) {
                     {size}
                   </button>
                 ))} */}
-                {productData.map((product) => (
-                  <button
-                    type="button"
-                    key={product.size}
-                    className={`${classes.sizeButton} ${
-                      selectedSize === product.size ? classes.selected : ""
-                    }`}
-                    onClick={() => setSelectedSize(product.size)}
-                  >
-                    {product.size}
-                  </button>
-                ))}
+                {productData.map(
+                  (product) =>
+                    product.color === selectedColor && (
+                      <button
+                        type="button"
+                        key={product.size}
+                        className={`${classes.sizeButton} ${
+                          selectedSize === product.size ? classes.selected : ""
+                        }`}
+                        onClick={() => setSelectedSize(product.size)}
+                      >
+                        {product.size}
+                      </button>
+                    )
+                )}
               </div>
               <input type="hidden" name="size" value={selectedSize} />
             </div>
 
             {/* Quantity Selection */}
             <div className={classes.quantitySection}>
-              <h4>Quantity</h4>
-              <div className={classes.quantityControl}>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                >
-                  -
-                </button>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={quantity}
-                  onChange={(e) =>
-                    setQuantity(Math.max(1, parseInt(e.target.value)))
-                  }
-                  min="1"
-                  className={classes.quantityInput}
-                />
-                <button type="button" onClick={() => setQuantity((q) => q + 1)}>
-                  +
-                </button>
-              </div>
+              {maxQuantity !== 0 ? (
+                <>
+                  <h4>Quantity</h4>
+                  <div className={classes.quantityControl}>
+                    {productData.map(
+                      (product) =>
+                        product.size === selectedSize && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setQuantity((q) => Math.max(1, q - 1))
+                              }
+                            >
+                              -
+                            </button>
+                            {/* <input
+                          type="number"
+                          name="quantity"
+                          value={quantity}
+                          onChange={(e) =>
+                            setQuantity(Math.max(1, parseInt(e.target.value)))
+                          }
+                          min="1"
+                          
+                          className={classes.quantityInput}
+                        /> */}
+                            <input
+                              type="number"
+                              name="quantity"
+                              value={quantity}
+                              onChange={(e) =>
+                                setQuantity(
+                                  Math.min(
+                                    maxQuantity,
+                                    Math.max(1, parseInt(e.target.value) || 1)
+                                  )
+                                )
+                              }
+                              min="1"
+                              max={maxQuantity}
+                              className={classes.quantityInput}
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setQuantity((q) => Math.min(maxQuantity, q + 1))
+                              }
+                              // onClick={() => setQuantity(maxQuantity)}
+                            >
+                              +
+                            </button>
+                          </>
+                        )
+                    )}
+                  </div>
+                </>
+              ) : (
+                selectedColor !== "" &&
+                selectedSize !== "" && <p>no products</p>
+              )}
             </div>
 
             <button

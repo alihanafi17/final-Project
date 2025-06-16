@@ -7,12 +7,15 @@ import ProductPage from "../productPage/ProductPage";
 function ProductShow({ product, featured = false, onClose }) {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [productData, setProductData] = useState("");
+
   
+
   useEffect(() => {
     if (showModal) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
       // Call onClose function when modal is closed if it exists
       if (!showModal && onClose) {
         onClose();
@@ -20,12 +23,12 @@ function ProductShow({ product, featured = false, onClose }) {
     }
 
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [showModal, onClose]);
 
   const handleProductClick = () => {
-    navigate(`/products/${product.product_id}`);
+    navigate(`/products/${product.id}`);
   };
 
   const handleAddToCart = (e) => {
@@ -36,11 +39,14 @@ function ProductShow({ product, featured = false, onClose }) {
   const handleCloseModal = () => {
     setShowModal(false);
   };
-  
+
   return (
     <>
       <div className={featured ? classes.featuredItem : classes.featuredGrid}>
-        <div key={product.product_id} className={`${classes.card} ${featured ? classes.featuredCard : ''}`}>
+        <div
+          key={product.product_id}
+          className={`${classes.card} ${featured ? classes.featuredCard : ""}`}
+        >
           <div className={classes.imageContainer}>
             <img
               onClick={handleProductClick}
@@ -52,7 +58,9 @@ function ProductShow({ product, featured = false, onClose }) {
           <div className={classes.info}>
             <h3 className={classes.name}>{product.name}</h3>
             <p className={classes.price}>${product.price}</p>
-            <button className={classes.cartBtn} onClick={handleAddToCart}>Add to Cart</button>
+            <button className={classes.cartBtn} onClick={handleAddToCart}>
+              Add to Cart
+            </button>
           </div>
         </div>
       </div>

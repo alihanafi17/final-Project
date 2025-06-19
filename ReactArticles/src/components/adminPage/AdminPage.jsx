@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../AuthContext";
 import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import styles from "./adminPage.module.css";
-
 
 function AdminPage() {
   const { user } = useAuth();
@@ -16,7 +16,9 @@ function AdminPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [allProducts, setAllProducts] = useState([]);
-  
+  const [allProd, setAllProd] = useState([]);
+  const navigate = useNavigate();
+
   // Form states
   const [newCategory, setNewCategory] = useState({ name: "", number: "" });
   const [productForm, setProductForm] = useState({
@@ -27,7 +29,7 @@ function AdminPage() {
     color: "",
     price: "",
     quantity: "",
-    category_id: ""
+    category_id: "",
   });
 
   // Fetch categories and all products on component mount
@@ -45,7 +47,7 @@ function AdminPage() {
     setErrorMessage("");
     setSuccessMessage("");
   }, [selectedCategory]);
-  
+
   // Clear messages after 5 seconds
   useEffect(() => {
     if (errorMessage || successMessage) {
@@ -53,7 +55,7 @@ function AdminPage() {
         setErrorMessage("");
         setSuccessMessage("");
       }, 5000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [errorMessage, successMessage]);
@@ -80,6 +82,17 @@ function AdminPage() {
       });
   };
 
+  const fetchAllProd = () => {
+    axios
+      .get(`http://localhost:8801/products/adminView`)
+      .then((res) => {
+        setAllProd(res.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching all products:", error);
+      });
+  };
+
   const fetchProductsByCategory = (categoryId) => {
     axios
       .get(`http://localhost:8801/products`)
@@ -99,9 +112,13 @@ function AdminPage() {
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
   };
-  
+
   const handleDeleteCategory = (categoryId) => {
-    if (window.confirm("Are you sure you want to delete this category? All products in this category will also be deleted.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this category? All products in this category will also be deleted."
+      )
+    ) {
       axios
         .delete(`http://localhost:8801/categories/${categoryId}`)
         .then(() => {
@@ -116,16 +133,30 @@ function AdminPage() {
           console.error("Error deleting category:", error);
           if (error.response) {
             if (error.response.status === 404) {
-              setErrorMessage(`Category not deleted: ID ${categoryId} not found in database`);
+              setErrorMessage(
+                `Category not deleted: ID ${categoryId} not found in database`
+              );
             } else if (error.response.status === 500) {
-              setErrorMessage(`Category not deleted: Server error - Please try again later`);
+              setErrorMessage(
+                `Category not deleted: Server error - Please try again later`
+              );
             } else {
-              setErrorMessage(`Category not deleted: ${error.response.data?.message || 'Unknown server error'}`);
+              setErrorMessage(
+                `Category not deleted: ${
+                  error.response.data?.message || "Unknown server error"
+                }`
+              );
             }
           } else if (error.request) {
-            setErrorMessage(`Category not deleted: No response from server - Check your connection`);
+            setErrorMessage(
+              `Category not deleted: No response from server - Check your connection`
+            );
           } else {
-            setErrorMessage(`Category not deleted: ${error.message || 'Unknown error occurred'}`);
+            setErrorMessage(
+              `Category not deleted: ${
+                error.message || "Unknown error occurred"
+              }`
+            );
           }
         });
     }
@@ -141,7 +172,7 @@ function AdminPage() {
   const handleAddProductClick = () => {
     setProductForm({
       ...productForm,
-      category_id: selectedCategory.category_id
+      category_id: selectedCategory.category_id,
     });
     setShowAddProduct(true);
     setEditingProduct(null);
@@ -156,33 +187,80 @@ function AdminPage() {
       color: product.color || "",
       price: product.price || "",
       quantity: product.quantity || "",
-      category_id: product.category_id || ""
+      category_id: product.category_id || "",
     });
     setEditingProduct(product);
     setShowAddProduct(true);
   };
 
+  // const handleShow = (id) => {
+  //   fetchAllProd();
+  //   console.log(id);
+  //   const filteredProd = allProd.filter((product) => product.id === id);
+  //   console.log(filteredProd);
+  //   navigate("/productAdmin", {
+  //     state: {
+  //       filteredProds: filteredProd,
+  //       selectedCategory: selectedCategory,
+  //     },
+  //   });
+  // };
+
+  const handleShow = async (id) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8801/products/adminView"
+      );
+      const prods = response.data;
+
+      const filteredProd = prods.filter((product) => product.id === id);
+
+      console.log("Filtered Product:", filteredProd);
+
+      navigate("/productAdmin", {
+        state: {
+          filteredProds: filteredProd,
+          selectedCategory: selectedCategory,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
   const handleCategorySubmit = (e) => {
     e.preventDefault();
-    
+
     // Check for empty fields
     if (!newCategory.name.trim() || !newCategory.number.trim()) {
       const missingFields = [];
-      if (!newCategory.name.trim()) missingFields.push('Category Name');
-      if (!newCategory.number.trim()) missingFields.push('Category ID');
-      
-      setErrorMessage(`Category not added: Missing required fields - ${missingFields.join(', ')}`);
+      if (!newCategory.name.trim()) missingFields.push("Category Name");
+      if (!newCategory.number.trim()) missingFields.push("Category ID");
+
+      setErrorMessage(
+        `Category not added: Missing required fields - ${missingFields.join(
+          ", "
+        )}`
+      );
       return;
     }
-    
+
     // Check if category ID already exists
-    const categoryExists = categories.some(cat => cat.category_id === newCategory.number);
+    const categoryExists = categories.some(
+      (cat) => cat.category_id === newCategory.number
+    );
     if (categoryExists) {
-      const existingCategory = categories.find(cat => cat.category_id === newCategory.number);
-      setErrorMessage(`Category not added: ID ${newCategory.number} already exists (${existingCategory?.category_name || 'Unknown category'})`);
+      const existingCategory = categories.find(
+        (cat) => cat.category_id === newCategory.number
+      );
+      setErrorMessage(
+        `Category not added: ID ${newCategory.number} already exists (${
+          existingCategory?.category_name || "Unknown category"
+        })`
+      );
       return;
     }
-    
+
     axios
       .post("http://localhost:8801/categories", newCategory)
       .then(() => {
@@ -196,49 +274,81 @@ function AdminPage() {
         if (error.response) {
           // Server responded with an error status code
           if (error.response.status === 400) {
-            setErrorMessage(`Category not added: ID ${newCategory.number} already exists in database`);
+            setErrorMessage(
+              `Category not added: ID ${newCategory.number} already exists in database`
+            );
           } else if (error.response.status === 500) {
-            setErrorMessage(`Category not added: Server error - Please try again later`);
+            setErrorMessage(
+              `Category not added: Server error - Please try again later`
+            );
           } else {
-            setErrorMessage(`Category not added: ${error.response.data?.message || 'Unknown server error'}`);
+            setErrorMessage(
+              `Category not added: ${
+                error.response.data?.message || "Unknown server error"
+              }`
+            );
           }
         } else if (error.request) {
           // Request was made but no response received
-          setErrorMessage(`Category not added: No response from server - Check your connection`);
+          setErrorMessage(
+            `Category not added: No response from server - Check your connection`
+          );
         } else {
           // Error in setting up the request
-          setErrorMessage(`Category not added: ${error.message || 'Unknown error occurred'}`);
+          setErrorMessage(
+            `Category not added: ${error.message || "Unknown error occurred"}`
+          );
         }
       });
   };
 
   const handleProductSubmit = (e) => {
     e.preventDefault();
-    
+
     // Check for empty required fields
-    const requiredFields = ['id', 'name', 'description', 'size', 'color', 'price', 'quantity'];
-    const emptyFields = requiredFields.filter(field => !productForm[field] || productForm[field].toString().trim() === '');
-    
+    const requiredFields = [
+      "id",
+      "name",
+      "description",
+      "size",
+      "color",
+      "price",
+      "quantity",
+    ];
+    const emptyFields = requiredFields.filter(
+      (field) =>
+        !productForm[field] || productForm[field].toString().trim() === ""
+    );
+
     if (emptyFields.length > 0) {
       const fieldLabels = {
-        id: 'Product ID',
-        name: 'Product Name',
-        description: 'Description',
-        size: 'Size',
-        color: 'Color',
-        price: 'Price',
-        quantity: 'Quantity'
+        id: "Product ID",
+        name: "Product Name",
+        description: "Description",
+        size: "Size",
+        color: "Color",
+        price: "Price",
+        quantity: "Quantity",
       };
-      
-      const missingFieldsLabels = emptyFields.map(field => fieldLabels[field] || field);
-      setErrorMessage(`Product not added: Missing required fields - ${missingFieldsLabels.join(', ')}`);
+
+      const missingFieldsLabels = emptyFields.map(
+        (field) => fieldLabels[field] || field
+      );
+      setErrorMessage(
+        `Product not added: Missing required fields - ${missingFieldsLabels.join(
+          ", "
+        )}`
+      );
       return;
     }
-    
+
     if (editingProduct) {
       // Update existing product
       axios
-        .put(`http://localhost:8801/products/${editingProduct.product_id}`, productForm)
+        .put(
+          `http://localhost:8801/products/${editingProduct.product_id}`,
+          productForm
+        )
         .then(() => {
           fetchProductsByCategory(selectedCategory.category_id);
           fetchAllProducts(); // Update all products list
@@ -252,31 +362,57 @@ function AdminPage() {
           if (error.response) {
             // Server responded with an error status code
             if (error.response.status === 400) {
-              setErrorMessage(`Product not updated: Bad request - ${error.response.data.message || 'Invalid data format'}`);
+              setErrorMessage(
+                `Product not updated: Bad request - ${
+                  error.response.data.message || "Invalid data format"
+                }`
+              );
             } else if (error.response.status === 404) {
-              setErrorMessage(`Product not updated: Product ID ${editingProduct.product_id} not found in database`);
+              setErrorMessage(
+                `Product not updated: Product ID ${editingProduct.product_id} not found in database`
+              );
             } else if (error.response.status === 500) {
-              setErrorMessage(`Product not updated: Server error - Please try again later`);
+              setErrorMessage(
+                `Product not updated: Server error - Please try again later`
+              );
             } else {
-              setErrorMessage(`Product not updated: ${error.response.data.message || 'Unknown server error'}`);
+              setErrorMessage(
+                `Product not updated: ${
+                  error.response.data.message || "Unknown server error"
+                }`
+              );
             }
           } else if (error.request) {
             // Request was made but no response received
-            setErrorMessage(`Product not updated: No response from server - Check your connection`);
+            setErrorMessage(
+              `Product not updated: No response from server - Check your connection`
+            );
           } else {
             // Error in setting up the request
-            setErrorMessage(`Product not updated: ${error.message || 'Unknown error occurred'}`);
+            setErrorMessage(
+              `Product not updated: ${
+                error.message || "Unknown error occurred"
+              }`
+            );
           }
         });
     } else {
       // Check if product ID already exists
-      const productExists = allProducts.some(product => product.id === productForm.id);
+      const productExists = allProducts.some(
+        (product) => product.id === productForm.id
+      );
       if (productExists) {
-        const existingProduct = allProducts.find(product => product.id === productForm.id);
-        setErrorMessage(`Product not added: ID ${productForm.id} already exists (${existingProduct?.name || 'Unknown product'})`);
+        const existingProduct = allProducts.find(
+          (product) => product.id === productForm.id
+        );
+        setErrorMessage(
+          `Product not added: ID ${productForm.id} already exists (${
+            existingProduct?.name || "Unknown product"
+          })`
+        );
         return;
       }
-      
+
       // Add new product
       axios
         .post("http://localhost:8801/products", productForm)
@@ -292,20 +428,36 @@ function AdminPage() {
           if (error.response) {
             // Server responded with an error status code
             if (error.response.status === 400) {
-              setErrorMessage(`Product not added: Bad request - ${error.response.data.message || 'Invalid data format'}`);
+              setErrorMessage(
+                `Product not added: Bad request - ${
+                  error.response.data.message || "Invalid data format"
+                }`
+              );
             } else if (error.response.status === 409) {
-              setErrorMessage(`Product not added: Conflict - Product ID ${productForm.id} already exists in database`);
+              setErrorMessage(
+                `Product not added: Conflict - Product ID ${productForm.id} already exists in database`
+              );
             } else if (error.response.status === 500) {
-              setErrorMessage(`Product not added: Server error - Please try again later`);
+              setErrorMessage(
+                `Product not added: Server error - Please try again later`
+              );
             } else {
-              setErrorMessage(`Product not added: ${error.response.data.message || 'Unknown server error'}`);
+              setErrorMessage(
+                `Product not added: ${
+                  error.response.data.message || "Unknown server error"
+                }`
+              );
             }
           } else if (error.request) {
             // Request was made but no response received
-            setErrorMessage(`Product not added: No response from server - Check your connection`);
+            setErrorMessage(
+              `Product not added: No response from server - Check your connection`
+            );
           } else {
             // Error in setting up the request
-            setErrorMessage(`Product not added: ${error.message || 'Unknown error occurred'}`);
+            setErrorMessage(
+              `Product not added: ${error.message || "Unknown error occurred"}`
+            );
           }
         });
     }
@@ -325,18 +477,32 @@ function AdminPage() {
           if (error.response) {
             // Server responded with an error status code
             if (error.response.status === 404) {
-              setErrorMessage(`Product not deleted: Product ID ${productId} not found in database`);
+              setErrorMessage(
+                `Product not deleted: Product ID ${productId} not found in database`
+              );
             } else if (error.response.status === 500) {
-              setErrorMessage(`Product not deleted: Server error - Please try again later`);
+              setErrorMessage(
+                `Product not deleted: Server error - Please try again later`
+              );
             } else {
-              setErrorMessage(`Product not deleted: ${error.response.data?.message || 'Unknown server error'}`);
+              setErrorMessage(
+                `Product not deleted: ${
+                  error.response.data?.message || "Unknown server error"
+                }`
+              );
             }
           } else if (error.request) {
             // Request was made but no response received
-            setErrorMessage(`Product not deleted: No response from server - Check your connection`);
+            setErrorMessage(
+              `Product not deleted: No response from server - Check your connection`
+            );
           } else {
             // Error in setting up the request
-            setErrorMessage(`Product not deleted: ${error.message || 'Unknown error occurred'}`);
+            setErrorMessage(
+              `Product not deleted: ${
+                error.message || "Unknown error occurred"
+              }`
+            );
           }
         });
     }
@@ -351,7 +517,7 @@ function AdminPage() {
       color: "",
       price: "",
       quantity: "",
-      category_id: selectedCategory ? selectedCategory.category_id : ""
+      category_id: selectedCategory ? selectedCategory.category_id : "",
     });
   };
 
@@ -359,7 +525,7 @@ function AdminPage() {
     const { name, value } = e.target;
     formSetter({
       ...formState,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -373,7 +539,7 @@ function AdminPage() {
         <h1>Admin Dashboard</h1>
         <p>Admin: {user.name}</p>
       </div>
-      
+
       {/* Message display */}
       {errorMessage && (
         <div className={styles.errorMessage}>
@@ -385,7 +551,7 @@ function AdminPage() {
           <p>{successMessage}</p>
         </div>
       )}
-      
+
       <div className={styles.contentContainer}>
         <div className={styles.categorySidebar}>
           <h2>Categories</h2>
@@ -434,7 +600,9 @@ function AdminPage() {
                     type="text"
                     name="name"
                     value={newCategory.name}
-                    onChange={(e) => handleInputChange(e, setNewCategory, newCategory)}
+                    onChange={(e) =>
+                      handleInputChange(e, setNewCategory, newCategory)
+                    }
                     required
                   />
                 </div>
@@ -444,14 +612,18 @@ function AdminPage() {
                     type="text"
                     name="number"
                     value={newCategory.number}
-                    onChange={(e) => handleInputChange(e, setNewCategory, newCategory)}
+                    onChange={(e) =>
+                      handleInputChange(e, setNewCategory, newCategory)
+                    }
                     required
                   />
                 </div>
                 <div className={styles.formActions}>
-                  <button type="submit" className={styles.submitButton}>Add Category</button>
-                  <button 
-                    type="button" 
+                  <button type="submit" className={styles.submitButton}>
+                    Add Category
+                  </button>
+                  <button
+                    type="button"
                     className={styles.cancelButton}
                     onClick={() => setShowAddCategory(false)}
                   >
@@ -462,7 +634,7 @@ function AdminPage() {
             </div>
           ) : showAddProduct ? (
             <div className={styles.formContainer}>
-              <h2>{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
+              <h2>{editingProduct ? "Edit Product" : "Add New Product"}</h2>
               <form onSubmit={handleProductSubmit}>
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
@@ -471,7 +643,9 @@ function AdminPage() {
                       type="text"
                       name="id"
                       value={productForm.id}
-                      onChange={(e) => handleInputChange(e, setProductForm, productForm)}
+                      onChange={(e) =>
+                        handleInputChange(e, setProductForm, productForm)
+                      }
                       required
                       disabled={editingProduct}
                     />
@@ -482,22 +656,26 @@ function AdminPage() {
                       type="text"
                       name="name"
                       value={productForm.name}
-                      onChange={(e) => handleInputChange(e, setProductForm, productForm)}
+                      onChange={(e) =>
+                        handleInputChange(e, setProductForm, productForm)
+                      }
                       required
                     />
                   </div>
                 </div>
-                
+
                 <div className={styles.formGroup}>
                   <label>Description:</label>
                   <textarea
                     name="description"
                     value={productForm.description}
-                    onChange={(e) => handleInputChange(e, setProductForm, productForm)}
+                    onChange={(e) =>
+                      handleInputChange(e, setProductForm, productForm)
+                    }
                     required
                   />
                 </div>
-                
+
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label>Size:</label>
@@ -505,7 +683,9 @@ function AdminPage() {
                       type="text"
                       name="size"
                       value={productForm.size}
-                      onChange={(e) => handleInputChange(e, setProductForm, productForm)}
+                      onChange={(e) =>
+                        handleInputChange(e, setProductForm, productForm)
+                      }
                       required
                     />
                   </div>
@@ -515,12 +695,14 @@ function AdminPage() {
                       type="text"
                       name="color"
                       value={productForm.color}
-                      onChange={(e) => handleInputChange(e, setProductForm, productForm)}
+                      onChange={(e) =>
+                        handleInputChange(e, setProductForm, productForm)
+                      }
                       required
                     />
                   </div>
                 </div>
-                
+
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label>Price:</label>
@@ -528,7 +710,9 @@ function AdminPage() {
                       type="number"
                       name="price"
                       value={productForm.price}
-                      onChange={(e) => handleInputChange(e, setProductForm, productForm)}
+                      onChange={(e) =>
+                        handleInputChange(e, setProductForm, productForm)
+                      }
                       required
                     />
                   </div>
@@ -538,18 +722,20 @@ function AdminPage() {
                       type="number"
                       name="quantity"
                       value={productForm.quantity}
-                      onChange={(e) => handleInputChange(e, setProductForm, productForm)}
+                      onChange={(e) =>
+                        handleInputChange(e, setProductForm, productForm)
+                      }
                       required
                     />
                   </div>
                 </div>
-                
+
                 <div className={styles.formActions}>
                   <button type="submit" className={styles.submitButton}>
-                    {editingProduct ? 'Update Product' : 'Add Product'}
+                    {editingProduct ? "Update Product" : "Add Product"}
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className={styles.cancelButton}
                     onClick={() => {
                       setShowAddProduct(false);
@@ -565,51 +751,65 @@ function AdminPage() {
             <div className={styles.productsContainer}>
               <div className={styles.categoryHeader}>
                 <h2>{selectedCategory.category_name} Products</h2>
-                <button 
+                <button
                   className={styles.addProductButton}
                   onClick={handleAddProductClick}
                 >
                   + Add Product
                 </button>
               </div>
-              
+
               {products.length > 0 ? (
                 <div className={styles.productsGrid}>
                   {products.map((product) => (
-                    <div key={product.product_id} className={styles.productCard}>
+                    <div
+                      key={product.product_id}
+                      className={styles.productCard}
+                    >
                       <h3>{product.name}</h3>
-                      <p className={styles.productDescription}>{product.description}</p>
+                      <p className={styles.productDescription}>
+                        {product.description}
+                      </p>
                       <div className={styles.productDetails}>
-                        <p><strong>Size:</strong> {product.size}</p>
-                        <p><strong>Color:</strong> {product.color}</p>
+                        <p>
+                          <strong>id:</strong> {product.id}
+                        </p>
+                        {/* <p><strong>Color:</strong> {product.color}</p>
                         <p><strong>Price:</strong> ${product.price}</p>
-                        <p><strong>Quantity:</strong> {product.quantity}</p>
+                        <p><strong>Quantity:</strong> {product.quantity}</p> */}
                       </div>
                       <div className={styles.productActions}>
-                        <button 
+                        <button
                           className={styles.editButton}
-                          onClick={() => handleEditProductClick(product)}
+                          onClick={() => handleShow(product.id)}
                         >
-                          Edit
+                          All products
                         </button>
-                        <button 
+                        {/* <button
                           className={styles.deleteButton}
-                          onClick={() => handleDeleteProduct(product.product_id)}
+                          onClick={() =>
+                            handleDeleteProduct(product.product_id)
+                          }
                         >
                           Delete
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className={styles.noProducts}>No products found in this category.</p>
+                <p className={styles.noProducts}>
+                  No products found in this category.
+                </p>
               )}
             </div>
           ) : (
             <div className={styles.welcomeMessage}>
               <h2>Welcome to the Admin Dashboard</h2>
-              <p>Select a category from the sidebar or add a new one to manage products.</p>
+              <p>
+                Select a category from the sidebar or add a new one to manage
+                products.
+              </p>
             </div>
           )}
         </div>

@@ -21,11 +21,12 @@ import ForgotPassword from "./forgotPassword/ForgotPassword";
 import CustomerService from "./customerService/CustomerService";
 import CartPage from "./cartPage/CartPage";
 import SearchPage from "./searchPage/SearchPage";
+import ProductAdmin from "./productsAdmin/ProductAdmin";
 
 function MyRoutes() {
   const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
-  
+
   useEffect(() => {
     fetchData();
     fetchUsers();
@@ -66,9 +67,18 @@ function MyRoutes() {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/men" element={<MenCollection products={products} />} />
-        <Route path="/women" element={<WomenCollection products={products} />} />
-        <Route path="/accessories" element={<Accessories products={products} />} />
-        <Route path="/products/:id" element={<ProductPage products={products} />} />
+        <Route
+          path="/women"
+          element={<WomenCollection products={products} />}
+        />
+        <Route
+          path="/accessories"
+          element={<Accessories products={products} />}
+        />
+        <Route
+          path="/products/:id"
+          element={<ProductPage products={products} />}
+        />
         <Route path="/login" element={<Login />} />
         <Route path="/adminPage" element={<AdminPage />} />
         <Route path="/userPage/:email" element={<UserPage info={users} />} />
@@ -77,6 +87,7 @@ function MyRoutes() {
         <Route path="/customerService" element={<CustomerService />} />
         <Route path="/cartPage" element={<CartPage />} />
         <Route path="/search" element={<SearchPage products={products} />} />
+        <Route path="/productAdmin" element={<ProductAdmin />} />
       </Routes>
       <Footer />
     </AuthProvider>

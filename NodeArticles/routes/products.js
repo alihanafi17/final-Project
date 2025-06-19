@@ -16,6 +16,18 @@ router.get("/", (req, res) => {
   });
 });
 
+router.get("/adminView", (req, res) => {
+  const query = "SELECT * FROM products";
+
+  db.query(query, (err, results) => {
+    if (err) {
+      res.status(500).send(err);
+      return;
+    }
+    res.json(results);
+  });
+});
+
 router.get("/:id", (req, res) => {
   const { id } = req.params;
   const query = "SELECT * FROM products WHERE id=?";

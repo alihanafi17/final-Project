@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import styles from "../adminPage/adminPage.module.css";
 import axios from "axios";
+import ProductForm from "../productForm/ProductForm";
 
 function ProductAdmin() {
   const location = useLocation();
@@ -29,6 +30,7 @@ function ProductAdmin() {
   const navigate = useNavigate();
 
   const handleEditProductClick = (product) => {
+    console.log(product);
     setProductForm({
       name: product.name || "",
       description: product.description || "",
@@ -38,7 +40,7 @@ function ProductAdmin() {
       quantity: product.quantity || "",
       category_id: product.category_id || "",
     });
-    setEditingProduct(product);
+    // setEditingProduct(product);
     setShowAddProduct(true);
   };
 
@@ -278,7 +280,11 @@ function ProductAdmin() {
               <div className={styles.productActions}>
                 <button
                   className={styles.editButton}
-                  onClick={() => handleEditProductClick(product)}
+                  onClick={() =>
+                    navigate("/productForm", {
+                      state: { product },
+                    })
+                  }
                 >
                   Edit
                 </button>

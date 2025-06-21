@@ -22,6 +22,7 @@ import CustomerService from "./customerService/CustomerService";
 import CartPage from "./cartPage/CartPage";
 import SearchPage from "./searchPage/SearchPage";
 import ProductAdmin from "./productsAdmin/ProductAdmin";
+import ProductForm from "./productForm/ProductForm";
 
 function MyRoutes() {
   const [products, setProducts] = useState([]);
@@ -88,6 +89,7 @@ function MyRoutes() {
         <Route path="/cartPage" element={<CartPage />} />
         <Route path="/search" element={<SearchPage products={products} />} />
         <Route path="/productAdmin" element={<ProductAdmin />} />
+        <Route path="/productForm" element={<ProductForm />} />
       </Routes>
       <Footer />
     </AuthProvider>

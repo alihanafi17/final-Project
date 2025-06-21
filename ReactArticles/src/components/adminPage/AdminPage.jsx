@@ -193,19 +193,6 @@ function AdminPage() {
     setShowAddProduct(true);
   };
 
-  // const handleShow = (id) => {
-  //   fetchAllProd();
-  //   console.log(id);
-  //   const filteredProd = allProd.filter((product) => product.id === id);
-  //   console.log(filteredProd);
-  //   navigate("/productAdmin", {
-  //     state: {
-  //       filteredProds: filteredProd,
-  //       selectedCategory: selectedCategory,
-  //     },
-  //   });
-  // };
-
   const handleShow = async (id) => {
     try {
       const response = await axios.get(

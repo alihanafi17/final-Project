@@ -7,6 +7,7 @@ const productsRoutes = require("./routes/products");
 const categoriesRoutes = require("./routes/categories");
 const ordersRoutes = require("./routes/orders");
 const serviceRoutes = require("./routes/service");
+const cartRoutes = require("./routes/cart");
 
 const app = express();
 const port = 8801;
@@ -26,6 +27,7 @@ app.use("/products", productsRoutes);
 app.use("/categories", categoriesRoutes);
 app.use("/orders", ordersRoutes);
 app.use("/service", serviceRoutes);
+app.use("/cart", cartRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);

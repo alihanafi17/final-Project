@@ -124,11 +124,14 @@ function Login() {
     try {
       const result = await login(email, password);
       if (!result.success) {
-        setError(result.message || "Invalid login");
+        setError(result.message || "Invalid email or password");
       } else {
-        localStorage.setItem("userEmail", email);
-        window.dispatchEvent(new Event("storage")); // 👈 Force update for listeners
-        navigate("/home");
+        const role = result.user?.role;
+        if (role === "admin") {
+          navigate("/admin");
+        } else if (role === "user") {
+          navigate("/userPage");
+        } 
       }
     } catch (err) {
       console.error("Login error:", err);

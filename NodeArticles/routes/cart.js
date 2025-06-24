@@ -160,7 +160,7 @@ router.put("/:email/:product_id", (req, res) => {
   });
 });
 
-// Delete cart item
+// Delete single cart item
 router.delete("/:email/:product_id", (req, res) => {
   const { email, product_id } = req.params;
 
@@ -178,15 +178,16 @@ router.delete("/:email/:product_id", (req, res) => {
   });
 });
 
+// Delete all cart items for a user (FIXED user_email column)
 router.delete("/:email/all", (req, res) => {
   const { email } = req.params;
 
-  const query = "DELETE FROM cart WHERE email = ?";
+  const query = "DELETE FROM cart WHERE user_email = ?";
 
   db.query(query, [email], (err, result) => {
     if (err) {
-      res.status(500).send(err);
-      return;
+      console.error("Error deleting all cart items:", err);
+      return res.status(500).json({ error: "Failed to delete all cart items" });
     }
 
     res.json({ message: "All cart items deleted for this user." });

@@ -1,71 +1,53 @@
-// import React from "react";
-// import { useLocation } from "react-router-dom";
-
-// function CartPage() {
-//   const location = useLocation();
-//   const { product, quantity } = location.state || {};
-//   console.log(product);
-
-//   if (!product) {
-//     return (
-//       <div style={{ padding: "2rem" }}>
-//         <h2>Your Cart</h2>
-//         <p>No product added to cart yet.</p>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div style={{ padding: "2rem" }}>
-//       <h2>Your Cart</h2>
-//       <div>
-//         <h3>{product.name}</h3>
-//         <p>
-//           <strong>Size:</strong> {product.size}
-//         </p>
-//         <p>
-//           <strong>Color:</strong> {product.color}
-//         </p>
-//         <p>
-//           <strong>Price:</strong> ${product.price}
-//         </p>
-//         <p>
-//           <strong>Quantity:</strong> {quantity}
-//         </p>
-//         <p>
-//           <strong>Total:</strong> ${(product.price * quantity).toFixed(2)}
-//         </p>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default CartPage;
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { checkAuth } from "../../auth"; // Make sure the path matches your project structure
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [email, setEmail] = useState(null);
 
-  const email = localStorage.getItem("userEmail");
-
+  // Validate session on load
   useEffect(() => {
-    if (!email) {
-      setError("You must be logged in to view the cart.");
-      setLoading(false);
-      return;
-    }
+    const validateAuth = async () => {
+      const result = await checkAuth();
+      if (result.authenticated && result.email) {
+        setEmail(result.email);
+        fetchCartItems(result.email);
+      } else {
+        setEmail(null);
+        setCartItems([]);
+        setError("You must be logged in to view the cart.");
+        setLoading(false);
+      }
+    };
 
-    fetchCartItems();
-  }, [email]);
+    validateAuth();
+  }, []);
 
-  const fetchCartItems = () => {
+  // Listen for localStorage logout (multi-tab sync)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const userEmail = localStorage.getItem("userEmail");
+      if (!userEmail) {
+        setEmail(null);
+        setCartItems([]);
+        setError("You must be logged in to view the cart.");
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const fetchCartItems = (userEmail) => {
+    setLoading(true);
     axios
-      .get(`http://localhost:8801/cart/${email}`)
+      .get(`http://localhost:8801/cart/${userEmail}`)
       .then((res) => {
         setCartItems(res.data);
+        setError("");
         setLoading(false);
       })
       .catch((err) => {
@@ -76,10 +58,11 @@ function CartPage() {
   };
 
   const handleDelete = (product_id) => {
+    if (!email) return;
+
     axios
       .delete(`http://localhost:8801/cart/${email}/${product_id}`)
       .then(() => {
-        // Remove deleted item from local state for instant UI update
         setCartItems((prevItems) =>
           prevItems.filter((item) => item.product_id !== product_id)
         );

@@ -20,6 +20,9 @@
 //       const result = await login(email, password);
 //       if (!result.success) {
 //         setError(result.message || "Invalid login");
+//       } else {
+//         localStorage.setItem("userEmail", email); // ✅ Store email
+//         navigate("/home"); // Redirect after login
 //       }
 //     } catch (err) {
 //       console.error("Login error:", err);
@@ -99,6 +102,7 @@
 // }
 
 // export default Login;
+// login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import classes from "./login.module.css";
@@ -122,8 +126,9 @@ function Login() {
       if (!result.success) {
         setError(result.message || "Invalid login");
       } else {
-        localStorage.setItem("userEmail", email); // ✅ Store email
-        navigate("/home"); // Redirect after login
+        localStorage.setItem("userEmail", email);
+        window.dispatchEvent(new Event("storage")); // 👈 Force update for listeners
+        navigate("/home");
       }
     } catch (err) {
       console.error("Login error:", err);

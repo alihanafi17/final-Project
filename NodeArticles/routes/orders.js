@@ -16,7 +16,7 @@ router.get("/", (req, res) => {
   });
 });
 
-router.get("/:id", (req, res) => {
+router.get("/orderId/:id", (req, res) => {
   const { id } = req.params;
 
   const query = "SELECT * FROM orders WHERE order_id = ?";
@@ -46,11 +46,10 @@ router.get("/:email", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  const { total_amount, email, status } = req.body;
-  const query =
-    "INSERT INTO orders (total_amount ,email,status) VALUES ( ?, ?,?)";
+  const { total_amount, email } = req.body;
+  const query = "INSERT INTO orders (total_amount ,email) VALUES ( ?, ?)";
 
-  db.query(query, [total_amount, email, status], (err, results) => {
+  db.query(query, [total_amount, email], (err, results) => {
     if (err) {
       res.status(500).send(err);
       return;
@@ -59,21 +58,21 @@ router.post("/", (req, res) => {
   });
 });
 
-router.put("/:id", (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
+// router.put("/:id", (req, res) => {
+//   const { id } = req.params;
+//   const { status } = req.body;
 
-  const query = "UPDATE orders SET status = ? WHERE order_id = ?";
+//   const query = "UPDATE orders SET status = ? WHERE order_id = ?";
 
-  db.query(query, [status, id], (err, results) => {
-    if (err) {
-      res.status(500).send(err);
-      return;
-    }
+//   db.query(query, [status, id], (err, results) => {
+//     if (err) {
+//       res.status(500).send(err);
+//       return;
+//     }
 
-    res.json({ message: "Order updated!" });
-  });
-});
+//     res.json({ message: "Order updated!" });
+//   });
+// });
 
 router.delete("/:id", (req, res) => {
   const { id } = req.params;

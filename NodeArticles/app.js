@@ -30,6 +30,7 @@ app.use("/orders", ordersRoutes);
 app.use("/service", serviceRoutes);
 app.use("/cart", cartRoutes);
 app.use("/order_contain_product", order_contain_productsRoutes);
+app.use("/uploads", express.static("uploads"));
 
 app.use((err, req, res, next) => {
   console.error(err);

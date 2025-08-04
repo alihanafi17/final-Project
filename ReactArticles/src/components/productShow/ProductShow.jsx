@@ -49,7 +49,7 @@ function ProductShow({ product, featured = false, onClose }) {
           <div className={classes.imageContainer}>
             <img
               onClick={handleProductClick}
-              src={mensImage}
+              src={`/uploads/${product.image}`}
               alt={product.name}
               className={classes.image}
             />

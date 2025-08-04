@@ -4,6 +4,7 @@
 
 // const db = dbSingleton.getConnection();
 
+// // Get all orders
 // router.get("/", (req, res) => {
 //   const query = "SELECT * FROM orders";
 
@@ -16,6 +17,7 @@
 //   });
 // });
 
+// // Get order by ID
 // router.get("/orderId/:id", (req, res) => {
 //   const { id } = req.params;
 
@@ -31,21 +33,20 @@
 //   });
 // });
 
-// // *** THIS IS THE IMPORTANT ENDPOINT for detailed order info ***
+// // Get detailed order info including products
 // router.get("/:id/details", (req, res) => {
 //   const { id } = req.params;
 
 //   const query = `
 //     SELECT
+//       p.product_id,
 //       p.name AS product_name,
 //       p.price AS unit_price,
-//       oi.quantity,
-//       oi.size,
-//       oi.color,
-//       (p.price * oi.quantity) AS subtotal
-//     FROM orders oi
-//     JOIN products p ON oi.product_id = p.id
-//     WHERE oi.order_id = ?
+//       ocp.quantity,
+//       (p.price * ocp.quantity) AS subtotal
+//     FROM order_contains_product ocp
+//     JOIN products p ON ocp.product_id = p.product_id
+//     WHERE ocp.order_id = ?
 //   `;
 
 //   db.query(query, [id], (err, results) => {
@@ -59,6 +60,7 @@
 //   });
 // });
 
+// // Get orders by user email
 // router.get("/:email", (req, res) => {
 //   const { email } = req.params;
 
@@ -74,8 +76,21 @@
 //   });
 // });
 
+// // Create new order
 // router.post("/", (req, res) => {
 //   const { email, total_amount, order_date, order_time } = req.body;
+
+//   // Validate inputs types
+//   if (
+//     typeof email !== "string" ||
+//     typeof total_amount !== "number" ||
+//     typeof order_date !== "string" ||
+//     typeof order_time !== "string"
+//   ) {
+//     return res
+//       .status(400)
+//       .json({ error: "Invalid input types for order creation" });
+//   }
 
 //   const query =
 //     "INSERT INTO orders (email, total_amount, order_date, order_time) VALUES (?, ?, ?, ?)";
@@ -85,13 +100,61 @@
 //     [email, total_amount, order_date, order_time],
 //     (err, results) => {
 //       if (err) {
+//         console.error("Error creating order:", err);
 //         res.status(500).send(err);
 //         return;
 //       }
 
-//       res.status(201).json({ message: "Order created successfully" });
+//       res.status(201).json({
+//         message: "Order created successfully",
+//         orderId: results.insertId,
+//       });
 //     }
 //   );
+// });
+
+// // Add products to an order (order_contains_product)
+// router.post("/:orderId/products", (req, res) => {
+//   const { orderId } = req.params;
+//   const { products, email } = req.body;
+
+//   if (!Array.isArray(products) || products.length === 0 || !email) {
+//     return res
+//       .status(400)
+//       .json({ error: "Products array and email are required" });
+//   }
+
+//   const values = products.map(({ product_id, quantity }) => [
+//     orderId,
+//     product_id,
+//     quantity,
+//   ]);
+
+//   const insertQuery = `
+//     INSERT INTO order_contains_product (order_id, product_id, total_products)
+//     VALUES ?
+//     ON DUPLICATE KEY UPDATE total_products = VALUES(total_products)
+//   `;
+
+//   db.query(insertQuery, [values], (err, result) => {
+//     if (err) {
+//       console.error("Error adding products to order:", err);
+//       return res.status(500).send("Error adding products to order");
+//     }
+
+//     // Clear cart for the user after products added to order
+//     const deleteQuery = "DELETE FROM cart WHERE user_email = ?";
+//     db.query(deleteQuery, [email], (deleteErr) => {
+//       if (deleteErr) {
+//         console.error("Error clearing cart:", deleteErr);
+//         return res.status(500).send("Order added but failed to clear cart");
+//       }
+
+//       res
+//         .status(201)
+//         .json({ message: "Order and products processed. Cart cleared." });
+//     });
+//   });
 // });
 
 // module.exports = router;
@@ -177,7 +240,6 @@ router.get("/:email", (req, res) => {
 router.post("/", (req, res) => {
   const { email, total_amount, order_date, order_time } = req.body;
 
-  // Validate inputs types
   if (
     typeof email !== "string" ||
     typeof total_amount !== "number" ||
@@ -239,7 +301,6 @@ router.post("/:orderId/products", (req, res) => {
       return res.status(500).send("Error adding products to order");
     }
 
-    // Clear cart for the user after products added to order
     const deleteQuery = "DELETE FROM cart WHERE user_email = ?";
     db.query(deleteQuery, [email], (deleteErr) => {
       if (deleteErr) {
@@ -254,5 +315,66 @@ router.post("/:orderId/products", (req, res) => {
   });
 });
 
+// 📊 Get order statistics
+router.get("/stats/dashboard", (req, res) => {
+  const statsQuery = `
+    SELECT 
+      (SELECT name FROM products 
+       JOIN order_contains_product ocp ON products.product_id = ocp.product_id 
+       GROUP BY ocp.product_id 
+       ORDER BY SUM(ocp.total_products) DESC 
+       LIMIT 1) AS most_ordered_product,
+
+      (SELECT SUM(total_amount) FROM orders) AS total_revenue,
+
+      (SELECT COUNT(*) FROM orders) AS total_orders,
+
+      (SELECT email FROM orders 
+       GROUP BY email 
+       ORDER BY COUNT(*) DESC 
+       LIMIT 1) AS most_active_customer
+  `;
+
+  db.query(statsQuery, (err, results) => {
+    if (err) {
+      console.error("Error fetching order statistics:", err);
+      return res.status(500).send("Error fetching statistics");
+    }
+
+    res.json(results[0]);
+  });
+});
+
+const nodemailer = require("nodemailer");
+
+router.post("/send-confirmation", async (req, res) => {
+  const { email, orderId } = req.body;
+
+  if (!email || !orderId) {
+    return res.status(400).json({ error: "Missing email or order ID" });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // or your provider
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from: `"NUVEL by Ali" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: `Your Order #${orderId} Confirmation`,
+      text: `Thank you for your purchase!\n\nYour order number is: ${orderId}\n\nWe will notify you once your items ship.`,
+    });
+
+    res.status(200).json({ message: "Confirmation email sent", info });
+  } catch (err) {
+    console.error("Failed to send email:", err);
+    res.status(500).json({ error: "Failed to send email" });
+  }
+});
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import styles from "../adminPage/adminPage.module.css";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -18,27 +18,42 @@ function ProductForm() {
     price: passedProduct.price || "",
     quantity: passedProduct.quantity || "",
     category_id: passedProduct.category_id || "",
+    image: null, // will hold the file object
   });
 
-  const handleInputChange = (e, formSetter, formState) => {
-    const { name, value } = e.target;
-    formSetter({
-      ...formState,
-      [name]: value,
-    });
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "image") {
+      setProductForm((prev) => ({ ...prev, image: files[0] }));
+    } else {
+      setProductForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
+
   const handleSubmit = (e) => {
-    e.preventDefault(); // prevent page reload
+    e.preventDefault();
+
+    const formData = new FormData();
+    Object.entries(productForm).forEach(([key, value]) => {
+      if (value !== null) {
+        formData.append(key, value);
+      }
+    });
 
     axios
       .put(
         `http://localhost:8801/products/${productForm.product_id}`,
-        productForm
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       )
       .then((res) => {
         console.log("Product updated successfully:", res.data);
         alert("Product updated successfully");
-        navigate("/adminPage"); // go back after saving
+        navigate("/adminPage");
       })
       .catch((err) => {
         console.error("Failed to update product:", err);
@@ -54,11 +69,9 @@ function ProductForm() {
             <label>Product ID:</label>
             <input
               type="text"
-              name="id"
+              name="product_id"
               value={productForm.product_id}
-              onChange={(e) =>
-                handleInputChange(e, setProductForm, productForm)
-              }
+              onChange={handleInputChange}
               disabled
             />
           </div>
@@ -68,9 +81,7 @@ function ProductForm() {
               type="text"
               name="name"
               value={productForm.name}
-              onChange={(e) =>
-                handleInputChange(e, setProductForm, productForm)
-              }
+              onChange={handleInputChange}
               disabled
             />
           </div>
@@ -81,7 +92,7 @@ function ProductForm() {
           <textarea
             name="description"
             value={productForm.description}
-            onChange={(e) => handleInputChange(e, setProductForm, productForm)}
+            onChange={handleInputChange}
             required
           />
         </div>
@@ -93,9 +104,7 @@ function ProductForm() {
               type="text"
               name="size"
               value={productForm.size}
-              onChange={(e) =>
-                handleInputChange(e, setProductForm, productForm)
-              }
+              onChange={handleInputChange}
               disabled
             />
           </div>
@@ -105,9 +114,7 @@ function ProductForm() {
               type="text"
               name="color"
               value={productForm.color}
-              onChange={(e) =>
-                handleInputChange(e, setProductForm, productForm)
-              }
+              onChange={handleInputChange}
               disabled
             />
           </div>
@@ -120,9 +127,7 @@ function ProductForm() {
               type="number"
               name="price"
               value={productForm.price}
-              onChange={(e) =>
-                handleInputChange(e, setProductForm, productForm)
-              }
+              onChange={handleInputChange}
               required
             />
           </div>
@@ -132,11 +137,21 @@ function ProductForm() {
               type="number"
               name="quantity"
               value={productForm.quantity}
-              onChange={(e) =>
-                handleInputChange(e, setProductForm, productForm)
-              }
+              onChange={handleInputChange}
               required
             />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Image:</label>
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={handleInputChange}
+            />
+            {productForm.image && typeof productForm.image === "object" && (
+              <p>Selected file: {productForm.image.name}</p>
+            )}
           </div>
         </div>
 

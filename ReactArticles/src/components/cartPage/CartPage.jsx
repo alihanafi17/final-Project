@@ -62,9 +62,7 @@
 //     axios
 //       .delete(`http://localhost:8801/cart/${email}/${product_id}`)
 //       .then(() => {
-//         setCartItems((prevItems) =>
-//           prevItems.filter((item) => item.product_id !== product_id)
-//         );
+//         fetchCartItems(email);
 //       })
 //       .catch((err) => {
 //         console.error("Failed to delete item:", err);
@@ -79,9 +77,40 @@
 //     return sum + price * quantity;
 //   }, 0);
 
-//   if (loading) {
-//     return <div style={{ padding: "2rem" }}>Loading cart...</div>;
-//   }
+//   const createOrderAndAddProducts = async () => {
+//     const orderDate = new Date();
+//     const formattedDate = orderDate.toISOString().split("T")[0];
+//     const formattedTime = orderDate.toTimeString().split(" ")[0];
+
+//     try {
+//       // Step 1: Create order and get orderId
+//       const createOrderRes = await axios.post("http://localhost:8801/orders", {
+//         email,
+//         total_amount: totalPrice,
+//         order_date: formattedDate,
+//         order_time: formattedTime,
+//       });
+
+//       const orderId = createOrderRes.data.orderId;
+//       if (!orderId) throw new Error("Failed to get order ID from response");
+
+//       // Step 2: Add products to order_contains_product (including email)
+//       await axios.post(`http://localhost:8801/orders/${orderId}/products`, {
+//         products: cartItems.map((item) => ({
+//           product_id: item.product_id,
+//           quantity: item.quantity,
+//         })),
+//         email, // ✅ Necessary for backend to clear cart
+//       });
+
+//       return orderId;
+//     } catch (err) {
+//       console.error("Error in createOrderAndAddProducts:", err);
+//       throw err;
+//     }
+//   };
+
+//   if (loading) return <div style={{ padding: "2rem" }}>Loading cart...</div>;
 
 //   if (error) {
 //     return (
@@ -175,15 +204,11 @@
 //                 alert(
 //                   `Transaction completed by ${details.payer.name.given_name}`
 //                 );
-
 //                 try {
-//                   // Save order
-//                   await axios.post("http://localhost:8801/orders", {
-//                     total_amount: totalPrice,
-//                     email,
-//                   });
+//                   // Create order and add products
+//                   await createOrderAndAddProducts();
 
-//                   // ✅ Update inventory
+//                   // Update product quantities
 //                   await axios.post(
 //                     "http://localhost:8801/products/update-quantities",
 //                     {
@@ -194,9 +219,12 @@
 //                     }
 //                   );
 
-//                   // Clear cart
+//                   // Clear cart on backend
 //                   await axios.delete(`http://localhost:8801/cart/${email}/all`);
+
+//                   // Clear cart on frontend
 //                   setCartItems([]);
+
 //                   alert("Order placed and cart cleared!");
 //                 } catch (err) {
 //                   console.error("Order processing error:", err);
@@ -301,7 +329,6 @@ function CartPage() {
     const formattedTime = orderDate.toTimeString().split(" ")[0];
 
     try {
-      // Step 1: Create order and get orderId
       const createOrderRes = await axios.post("http://localhost:8801/orders", {
         email,
         total_amount: totalPrice,
@@ -312,13 +339,12 @@ function CartPage() {
       const orderId = createOrderRes.data.orderId;
       if (!orderId) throw new Error("Failed to get order ID from response");
 
-      // Step 2: Add products to order_contains_product (including email)
       await axios.post(`http://localhost:8801/orders/${orderId}/products`, {
         products: cartItems.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity,
         })),
-        email, // ✅ Necessary for backend to clear cart
+        email,
       });
 
       return orderId;
@@ -423,10 +449,8 @@ function CartPage() {
                   `Transaction completed by ${details.payer.name.given_name}`
                 );
                 try {
-                  // Create order and add products
-                  await createOrderAndAddProducts();
+                  const orderId = await createOrderAndAddProducts();
 
-                  // Update product quantities
                   await axios.post(
                     "http://localhost:8801/products/update-quantities",
                     {
@@ -437,13 +461,21 @@ function CartPage() {
                     }
                   );
 
-                  // Clear cart on backend
                   await axios.delete(`http://localhost:8801/cart/${email}/all`);
 
-                  // Clear cart on frontend
-                  setCartItems([]);
+                  await axios.post(
+                    "http://localhost:8801/orders/send-confirmation",
+                    {
+                      email,
+                      orderId,
+                     
+                    }
+                  );
 
-                  alert("Order placed and cart cleared!");
+                  setCartItems([]);
+                  alert(
+                    `Order placed and cart cleared! A confirmation email was sent to ${email}.`
+                  );
                 } catch (err) {
                   console.error("Order processing error:", err);
                   alert("Failed to process order. Please contact support.");

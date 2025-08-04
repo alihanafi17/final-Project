@@ -22,11 +22,10 @@ function MenCollection({ products }) {
       case "name-z-a":
         return b.name.localeCompare(a.name);
       default:
-        return 0; // Default order (as received from API)
+        return 0;
     }
   });
 
-  // Handle sort change
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
   };
@@ -35,9 +34,13 @@ function MenCollection({ products }) {
     <div className={classes.menCollectionContainer}>
       <div className={classes.collectionHeader}>
         <h1>Men's Collection</h1>
-        <p>Discover refined essentials for the modern man, combining exceptional craftsmanship with contemporary design for effortless, sophisticated style.</p>
+        <p>
+          Discover refined essentials for the modern man, combining exceptional
+          craftsmanship with contemporary design for effortless, sophisticated
+          style.
+        </p>
       </div>
-      
+
       <div className={classes.sortContainer}>
         <label htmlFor="sort-select">Sort by: </label>
         <select
@@ -56,7 +59,7 @@ function MenCollection({ products }) {
 
       <div className={classes.productGrid}>
         {sortedProducts.map((product) => (
-          <ProductShow  key={crypto.randomUUID()} product={product} />
+          <ProductShow key={product.id} product={product} />
         ))}
       </div>
     </div>

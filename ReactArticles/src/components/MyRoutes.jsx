@@ -23,6 +23,8 @@ import CartPage from "./cartPage/CartPage";
 import SearchPage from "./searchPage/SearchPage";
 import ProductAdmin from "./productsAdmin/ProductAdmin";
 import ProductForm from "./productForm/ProductForm";
+import AdminCategories from "./adminPage/AdminCategories";
+import AdminProducts from "./adminPage/AdminProducts";
 
 function MyRoutes() {
   const [products, setProducts] = useState([]);
@@ -90,6 +92,8 @@ function MyRoutes() {
         <Route path="/search" element={<SearchPage products={products} />} />
         <Route path="/productAdmin" element={<ProductAdmin />} />
         <Route path="/productForm" element={<ProductForm />} />
+        <Route path="/adminPage/categories" element={<AdminCategories />} />
+        <Route path="/adminPage/products" element={<AdminProducts />} />
       </Routes>
       <Footer />
     </AuthProvider>

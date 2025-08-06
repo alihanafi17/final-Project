@@ -21,16 +21,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ✅ Get all products (for users)
+// ✅ Get all products group by id
 router.get("/", (req, res) => {
-  const query = "SELECT * FROM products GROUP BY id";
+  const query = "SELECT * FROM products group by id";
   db.query(query, (err, results) => {
     if (err) return res.status(500).json({ error: err });
     res.json(results);
   });
 });
 
-// ✅ Get all products (for admin)
+
+// ✅ Get all products 
 router.get("/adminView", (req, res) => {
   const query = "SELECT * FROM products";
   db.query(query, (err, results) => {

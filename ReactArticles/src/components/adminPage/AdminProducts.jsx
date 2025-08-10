@@ -208,7 +208,8 @@ function AdminProducts({
                 name="color"
                 value={formData.color}
                 onChange={handleInputChange}
-                required
+                required={!editingProduct}
+                disabled={editingProduct}
               />
             </div>
             <div className={styles.formGroup}>

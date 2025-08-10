@@ -142,7 +142,7 @@ function Login() {
   return (
     <div className={classes.loginContainer}>
       <div className={classes.loginCard}>
-        <h2 className={classes.loginTitle}>Login</h2>
+        <h2 className={classes.loginTitle}>Welcome Back!</h2>
 
         {error && <div className={classes.errorMessage}>{error}</div>}
 

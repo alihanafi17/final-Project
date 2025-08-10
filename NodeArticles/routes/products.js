@@ -30,8 +30,7 @@ router.get("/", (req, res) => {
   });
 });
 
-
-// ✅ Get all products 
+// ✅ Get all products
 router.get("/adminView", (req, res) => {
   const query = "SELECT * FROM products";
   db.query(query, (err, results) => {
@@ -45,6 +44,16 @@ router.get("/:id", (req, res) => {
   const { id } = req.params;
   const query = "SELECT * FROM products WHERE id=?";
   db.query(query, [id], (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(results);
+  });
+});
+
+// ✅ Get product by product_ID
+router.get("/product-id/:product_id", (req, res) => {
+  const { product_id } = req.params;
+  const query = "SELECT * FROM products WHERE product_id=?";
+  db.query(query, [product_id], (err, results) => {
     if (err) return res.status(500).json({ error: err });
     res.json(results);
   });

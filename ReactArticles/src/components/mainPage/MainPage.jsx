@@ -46,6 +46,9 @@ function MainPage() {
         <div className={classes.btns}>
           <button onClick={() => navigate("/men")}>Shop Men</button>
           <button onClick={() => navigate("/women")}>Shop Women</button>
+          <button onClick={() => navigate("/accessories")}>
+            Shop Accessories
+          </button>
         </div>
       </section>
       <section className={classes.section2}>

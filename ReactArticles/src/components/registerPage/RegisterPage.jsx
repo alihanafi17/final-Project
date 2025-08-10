@@ -83,7 +83,7 @@ function RegisterPage() {
       )}
       
       <div className={classes.registerCard}>
-        <h2 className={classes.registerTitle}>Register</h2>
+        <h2 className={classes.registerTitle}>Join us!</h2>
 
         {error && <div className={classes.errorMessage}>{error}</div>}
 

@@ -25,6 +25,8 @@ import ProductAdmin from "./productsAdmin/ProductAdmin";
 import ProductForm from "./productForm/ProductForm";
 import AdminCategories from "./adminPage/AdminCategories";
 import AdminProducts from "./adminPage/AdminProducts";
+import PrivacyPolicy from "./privacyPolicy/PrivacyPolicy";
+import Terms from "./terms/Terms";
 
 function MyRoutes() {
   const [products, setProducts] = useState([]);
@@ -94,6 +96,8 @@ function MyRoutes() {
         <Route path="/productForm" element={<ProductForm />} />
         <Route path="/adminPage/categories" element={<AdminCategories />} />
         <Route path="/adminPage/products" element={<AdminProducts />} />
+        <Route path="/privacyPolicy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
       </Routes>
       <Footer />
     </AuthProvider>

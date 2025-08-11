@@ -56,27 +56,19 @@ function Footer() {
               <Link to="/customerService">Customer Service</Link>
             </li>
             <li>
-              <Link to={user ? (user.role === "admin" ? "/adminPage" : `/userPage/${user.email}`) : "/login"}>
+              <Link
+                to={
+                  user
+                    ? user.role === "admin"
+                      ? "/adminPage"
+                      : `/userPage/${user.email}`
+                    : "/login"
+                }
+              >
                 My Account
               </Link>
             </li>
           </ul>
-        </div>
-
-        <div className={classes.footer__column}>
-          <h4 className={classes.footer__subtitle}>Subscribe</h4>
-          <p className={classes.footer__text}>
-            Subscribe to our newsletter to get updates on our latest collections
-            and exclusive offers.
-          </p>
-          <div className={classes.footer__newsletter}>
-            <input
-              type="email"
-              placeholder="Your email address"
-              className={classes.footer__input}
-            />
-            <button className={classes.footer__button}>Subscribe</button>
-          </div>
         </div>
       </div>
 
@@ -85,8 +77,8 @@ function Footer() {
           {new Date().getFullYear()} Nuvel. All Rights Reserved.
         </p>
         <div className={classes.footer__policy}>
-          <Link to="/">Privacy Policy</Link>
-          <Link to="/">Terms of Service</Link>
+          <Link to="/privacyPolicy">Privacy Policy</Link>
+          <Link to="/terms">Terms of Service</Link>
         </div>
       </div>
     </footer>

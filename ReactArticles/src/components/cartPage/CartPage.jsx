@@ -205,6 +205,7 @@
 //                 try {
 //                   const orderId = await createOrderAndAddProducts();
 
+//                   // Update quantities
 //                   await axios.post(
 //                     "http://localhost:8801/products/update-quantities",
 //                     {
@@ -215,21 +216,28 @@
 //                     }
 //                   );
 
+//                   // Clear the cart
 //                   await axios.delete(`http://localhost:8801/cart/${email}/all`);
 
+//                   // Send confirmation email to customer
 //                   await axios.post(
 //                     "http://localhost:8801/orders/send-confirmation",
 //                     {
 //                       email,
 //                       orderId,
-
 //                     }
 //                   );
 
 //                   setCartItems([]);
 //                   alert(
-//                     `Order placed and cart cleared! A confirmation email was sent to ${email}.`
+//                     `Order placed and cart cleared! A confirmation email was sent to ${email}. Admin has been notified.`
 //                   );
+
+//                   // Notify admin
+//                   await axios.post("http://localhost:8801/orders/notify-admin", {
+//                     orderId,
+//                     customerEmail: email,
+//                   });
 //                 } catch (err) {
 //                   console.error("Order processing error:", err);
 //                   alert("Failed to process order. Please contact support.");
@@ -455,16 +463,7 @@ function CartPage() {
                 try {
                   const orderId = await createOrderAndAddProducts();
 
-                  // Update quantities
-                  await axios.post(
-                    "http://localhost:8801/products/update-quantities",
-                    {
-                      products: cartItems.map((item) => ({
-                        product_id: item.product_id,
-                        quantity: item.quantity,
-                      })),
-                    }
-                  );
+                  // **Remove quantity update here — admin confirmation will handle it**
 
                   // Clear the cart
                   await axios.delete(`http://localhost:8801/cart/${email}/all`);
@@ -484,10 +483,13 @@ function CartPage() {
                   );
 
                   // Notify admin
-                  await axios.post("http://localhost:8801/orders/notify-admin", {
-                    orderId,
-                    customerEmail: email,
-                  });
+                  await axios.post(
+                    "http://localhost:8801/orders/notify-admin",
+                    {
+                      orderId,
+                      customerEmail: email,
+                    }
+                  );
                 } catch (err) {
                   console.error("Order processing error:", err);
                   alert("Failed to process order. Please contact support.");

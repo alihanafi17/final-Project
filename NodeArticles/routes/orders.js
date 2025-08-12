@@ -4,6 +4,27 @@
 // const db = dbSingleton.getConnection();
 // const nodemailer = require("nodemailer");
 
+// // Helper to send emails using nodemailer
+// async function sendEmail({ to, subject, text, html }) {
+//   const transporter = nodemailer.createTransport({
+//     service: "gmail",
+//     auth: {
+//       user: process.env.EMAIL_USER,
+//       pass: process.env.EMAIL_PASS,
+//     },
+//   });
+
+//   const mailOptions = {
+//     from: `"NUVEL by Ali" <${process.env.EMAIL_USER}>`,
+//     to,
+//     subject,
+//     text,
+//     html,
+//   };
+
+//   return transporter.sendMail(mailOptions);
+// }
+
 // // Get all orders
 // router.get("/", (req, res) => {
 //   const query = "SELECT * FROM orders";
@@ -416,7 +437,6 @@ router.post("/notify-admin", async (req, res) => {
   }
 });
 
-// ✅ Mark order as completed and send email
 router.put("/:id/complete", async (req, res) => {
   const { id } = req.params;
 
@@ -437,6 +457,11 @@ router.put("/:id/complete", async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
+    // **Check if order already completed to prevent double update**
+    if (order.status === "Completed") {
+      return res.status(400).json({ error: "Order already completed" });
+    }
+
     // 2. Update status
     await new Promise((resolve, reject) => {
       db.query(
@@ -449,23 +474,65 @@ router.put("/:id/complete", async (req, res) => {
       );
     });
 
-    // 3. Send confirmation email
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
+    // 3. Deduct stock and check for low inventory
+    const products = await new Promise((resolve, reject) => {
+      db.query(
+        `SELECT p.product_id, p.name, p.quantity, ocp.total_products AS ordered_quantity
+         FROM order_contains_product ocp
+         JOIN products p ON ocp.product_id = p.product_id
+         WHERE ocp.order_id = ?`,
+        [id],
+        (err, results) => {
+          if (err) return reject(err);
+          resolve(results);
+        }
+      );
     });
 
-    await transporter.sendMail({
-      from: `"NUVEL by Ali" <${process.env.EMAIL_USER}>`,
+    let lowStockProducts = [];
+
+    for (let prod of products) {
+      const newQuantity = prod.quantity - prod.ordered_quantity;
+
+      // Prevent negative quantity
+      const finalQuantity = newQuantity < 0 ? 0 : newQuantity;
+
+      await new Promise((resolve, reject) => {
+        db.query(
+          "UPDATE products SET quantity = ? WHERE product_id = ?",
+          [finalQuantity, prod.product_id],
+          (err) => {
+            if (err) return reject(err);
+            resolve();
+          }
+        );
+      });
+
+      if (finalQuantity <= 5) {
+        lowStockProducts.push(
+          `${prod.name} (ID: ${prod.product_id}, Remaining: ${finalQuantity})`
+        );
+      }
+    }
+
+    if (lowStockProducts.length > 0) {
+      await sendEmail({
+        to: "alihanafi1720@gmail.com",
+        subject: "Low Stock Alert",
+        text: `The following products are low in stock:\n\n${lowStockProducts.join(
+          "\n"
+        )}`,
+      });
+    }
+
+    // 4. Send confirmation email to customer
+    await sendEmail({
       to: order.email,
       subject: `Your Order #${order.order_id} is Completed and Shipped To You!`,
       text: `Hello,\n\nYour order #${order.order_id} has been completed. Thank you for shopping with us!\n\nBest regards,\nNUVEL by Ali`,
     });
 
-    res.json({ message: "Order marked as completed and email sent" });
+    res.json({ message: "Order completed, stock updated, and emails sent" });
   } catch (err) {
     console.error("Error completing order:", err);
     res.status(500).json({ error: "Failed to complete order" });
@@ -475,9 +542,7 @@ router.put("/:id/complete", async (req, res) => {
 // Get order by ID (basic info only)
 router.get("/orderId/:id", (req, res) => {
   const { id } = req.params;
-
   const query = "SELECT * FROM orders WHERE order_id = ?";
-
   db.query(query, [id], (err, results) => {
     if (err) {
       return res.status(500).send(err);
@@ -532,9 +597,7 @@ router.get("/:id/details", (req, res) => {
 // Get orders by user email
 router.get("/:email", (req, res) => {
   const { email } = req.params;
-
   const query = "SELECT * FROM orders WHERE email = ?";
-
   db.query(query, [email], (err, results) => {
     if (err) {
       return res.status(500).send(err);
@@ -578,7 +641,7 @@ router.post("/", (req, res) => {
   );
 });
 
-// Add products to an order (order_contains_product)
+// Add products to an order
 router.post("/:orderId/products", (req, res) => {
   const { orderId } = req.params;
   const { products, email } = req.body;
@@ -601,7 +664,7 @@ router.post("/:orderId/products", (req, res) => {
     ON DUPLICATE KEY UPDATE total_products = VALUES(total_products)
   `;
 
-  db.query(insertQuery, [values], (err, result) => {
+  db.query(insertQuery, [values], (err) => {
     if (err) {
       console.error("Error adding products to order:", err);
       return res.status(500).send("Error adding products to order");
@@ -622,19 +685,16 @@ router.post("/:orderId/products", (req, res) => {
   });
 });
 
-// Delete products by category safely (new route example)
-// Deletes entries from order_contains_product first, then products
+// Delete products by category safely
 router.delete("/products/category/:categoryId", (req, res) => {
   const { categoryId } = req.params;
 
-  // 1. Delete dependent order_contains_product entries first
   const deleteDependentQuery = `
     DELETE ocp FROM order_contains_product ocp
     JOIN products p ON ocp.product_id = p.product_id
     WHERE p.category_id = ?
   `;
 
-  // 2. Delete products themselves
   const deleteProductsQuery = `DELETE FROM products WHERE category_id = ?`;
 
   db.query(deleteDependentQuery, [categoryId], (err) => {
@@ -698,16 +758,7 @@ router.post("/send-confirmation", async (req, res) => {
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail", // or your provider
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"NUVEL by Ali" <${process.env.EMAIL_USER}>`,
+    await sendEmail({
       to: email,
       subject: `Your Order #${orderId} Confirmation`,
       text: `Thank you for your purchase!\n\nYour order number is: ${orderId}\n\nWe will notify you once your items ship.`,
@@ -717,6 +768,54 @@ router.post("/send-confirmation", async (req, res) => {
   } catch (err) {
     console.error("Failed to send email:", err);
     res.status(500).json({ error: "Failed to send email" });
+  }
+});
+
+router.put("/:id/reject", async (req, res) => {
+  //console.log(`Reject order called for id=${req.params.id}`, req.body);
+  const { id } = req.params;
+  const { rejectionReason } = req.body;
+
+  try {
+    // 1. Update order status only (no rejection_reason column)
+    await new Promise((resolve, reject) => {
+      db.query(
+        "UPDATE orders SET status = 'Rejected' WHERE order_id = ?",
+        [id],
+        (err) => {
+          if (err) return reject(err);
+          resolve();
+        }
+      );
+    });
+
+    // 2. Get order email for sending rejection reason
+    const [order] = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT email FROM orders WHERE order_id = ?",
+        [id],
+        (err, results) => {
+          if (err) return reject(err);
+          resolve(results);
+        }
+      );
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // 3. Send rejection email with reason text
+    await sendEmail({
+      to: order.email,
+      subject: `Your Order #${id} Has Been Rejected`,
+      text: `Hello,\n\nUnfortunately, your order #${id} has been rejected for the following reason:\n\n${rejectionReason}\n\nIf you have any questions, please contact us.\n\nBest regards,\nNUVEL by Ali`,
+    });
+
+    res.json({ message: "Order rejected and customer notified" });
+  } catch (err) {
+    console.error("Error rejecting order:", err);
+    res.status(500).json({ error: "Failed to reject order" });
   }
 });
 

@@ -16,10 +16,9 @@
 
 //   useEffect(() => {
 //     axios
-//       .get(`/products/${id}`)
+//       .get(`http://localhost:8801/products/${id}`)
 //       .then((res) => {
 //         setProductData(res.data);
-//         console.log(res.data);
 //       })
 //       .catch((error) => {
 //         console.error("Error:", error);
@@ -79,10 +78,15 @@
 //     return <div className={classes.loading}>Loading product...</div>;
 //   }
 
+//   // Construct the full image URL
+//   const productImageUrl = productData[0].image
+//     ? `http://localhost:8801/uploads/${productData[0].image}`
+//     : mensImage;
+
 //   return (
 //     <div className={classes.fullProduct}>
 //       <img
-//         src={productData[0].image || mensImage}
+//         src={productImageUrl}
 //         alt={productData[0].name}
 //         className={classes.productImg}
 //       />
@@ -219,11 +223,19 @@ function ProductPage() {
       (prod) => prod.size === selectedSize && prod.color === selectedColor
     );
     if (maxQ.length !== 0) setMaxQuantity(maxQ[0].quantity);
+    else setMaxQuantity(0);
+    // Reset quantity to 1 whenever maxQuantity changes
+    setQuantity(1);
   }, [selectedColor, selectedSize, productData]);
 
   const handleAddToCart = async (selectedColor, selectedSize, quantity, id) => {
     if (!selectedSize || !selectedColor) {
       alert("Please select both color and size.");
+      return;
+    }
+
+    if (maxQuantity === 0) {
+      alert("Sorry, this product is out of stock.");
       return;
     }
 
@@ -271,6 +283,8 @@ function ProductPage() {
   const productImageUrl = productData[0].image
     ? `http://localhost:8801/uploads/${productData[0].image}`
     : mensImage;
+
+  const isOutOfStock = maxQuantity === 0;
 
   return (
     <div className={classes.fullProduct}>
@@ -323,7 +337,12 @@ function ProductPage() {
         </div>
 
         <div className={classes.quantitySection}>
-          {maxQuantity !== 0 ? (
+          {isOutOfStock ? (
+            selectedColor !== "" &&
+            selectedSize !== "" && (
+              <p className={classes.outOfStock}>Out of stock</p>
+            )
+          ) : (
             <>
               <h4>Quantity</h4>
               <div className={classes.quantityControl}>
@@ -359,15 +378,13 @@ function ProductPage() {
                 </button>
               </div>
             </>
-          ) : (
-            selectedColor !== "" && selectedSize !== "" && <p>Out of stock</p>
           )}
         </div>
 
         <button
           type="button"
           className={classes.addToCart}
-          disabled={!selectedSize}
+          disabled={!selectedSize || isOutOfStock}
           onClick={() =>
             handleAddToCart(selectedColor, selectedSize, quantity, id)
           }

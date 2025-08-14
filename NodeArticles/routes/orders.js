@@ -626,5 +626,30 @@ router.get("/stats/products", async (req, res) => {
     res.status(500).send("Failed to export Excel");
   }
 });
+// New route: get orders by date range
+router.get("/by-date", async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    return res.status(400).json({ error: "startDate and endDate required" });
+  }
+
+  try {
+    const query = `
+      SELECT * 
+      FROM orders
+      WHERE order_date BETWEEN ? AND ?
+      ORDER BY order_date DESC, order_time DESC
+    `;
+
+    db.query(query, [startDate, endDate], (err, results) => {
+      if (err) return res.status(500).send(err);
+      res.json(results);
+    });
+  } catch (err) {
+    console.error("Error fetching orders by date range:", err);
+    res.status(500).send("Failed to fetch orders by date range");
+  }
+});
 
 module.exports = router;

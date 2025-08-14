@@ -538,3 +538,172 @@ Admin Container .adminContainer {
   cursor: pointer;
   border-radius: 3px;
 }
+.pendingContainer {
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.message {
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.error {
+  background: #ffe5e5;
+  color: #d8000c;
+}
+
+.success {
+  background: #e5ffe5;
+  color: #4f8a10;
+}
+
+.loading,
+.empty {
+  padding: 20px;
+  text-align: center;
+  color: #555;
+}
+
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.orderCard {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 15px;
+  background: #fafafa;
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.orderDetails p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.items {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+}
+
+.item {
+  font-size: 0.85rem;
+  color: #555;
+}
+.navButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.navButton {
+  padding: 8px 14px;
+  border: none;
+  background: #eee;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.navButton:hover {
+  background: #ddd;
+}
+
+.activeButton {
+  padding: 8px 14px;
+  border: none;
+  background: #4a90e2;
+  color: white;
+  border-radius: 6px;
+}
+.productsList {
+  margin-top: 10px;
+}
+
+.productsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 5px;
+}
+
+.productsTable th,
+.productsTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.productsTable th {
+  background-color: #f5f5f5;
+}
+.chartContainer {
+  width: 100%;
+  height: 300px; /* Must have height */
+  margin-bottom: 20px;
+}
+/* Date range container */
+.dateRangeContainer {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.dateRangeContainer label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  color: #333;
+}
+
+.dateRangeContainer input[type="date"] {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-top: 4px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.dateRangeContainer input[type="date"]:focus {
+  border-color: #82ca9d;
+}
+
+/* Download button */
+.downloadButton {
+  padding: 8px 16px;
+  background-color: #82ca9d;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 20px;
+}
+
+.downloadButton:hover {
+  background-color: #6bb387;
+}

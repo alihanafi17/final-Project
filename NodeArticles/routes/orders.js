@@ -1,380 +1,9 @@
-// const express = require("express");
-// const router = express.Router();
-// const dbSingleton = require("../dbSingleton");
-// const db = dbSingleton.getConnection();
-// const nodemailer = require("nodemailer");
-
-// // Helper to send emails using nodemailer
-// async function sendEmail({ to, subject, text, html }) {
-//   const transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     auth: {
-//       user: process.env.EMAIL_USER,
-//       pass: process.env.EMAIL_PASS,
-//     },
-//   });
-
-//   const mailOptions = {
-//     from: `"NUVEL by Ali" <${process.env.EMAIL_USER}>`,
-//     to,
-//     subject,
-//     text,
-//     html,
-//   };
-
-//   return transporter.sendMail(mailOptions);
-// }
-
-// // Get all orders
-// router.get("/", (req, res) => {
-//   const query = "SELECT * FROM orders";
-//   db.query(query, (err, results) => {
-//     if (err) return res.status(500).send(err);
-//     res.json(results);
-//   });
-// });
-
-// // ✅ Get only pending orders
-// router.get("/pending", (req, res) => {
-//   const query = "SELECT * FROM orders WHERE status = 'pending'";
-//   db.query(query, (err, results) => {
-//     if (err) {
-//       console.error("Error fetching pending orders:", err);
-//       return res.status(500).send(err);
-//     }
-//     res.json(results);
-//   });
-// });
-
-// router.post("/notify-admin", async (req, res) => {
-//   const { orderId, customerEmail } = req.body;
-//   console.log("Notify-admin called with:", req.body);
-
-//   try {
-//     await sendEmail({
-//       to: "alihanafi1720@gmail.com",
-//       subject: `New Order Waiting for Confirmation - #${orderId}`,
-//       text: `A new order (#${orderId}) from ${customerEmail} is waiting for confirmation. Please log in to the admin panel.`,
-//     });
-
-//     console.log("Admin notification email sent");
-//     res.status(200).json({ message: "Admin notified successfully" });
-//   } catch (error) {
-//     console.error("Failed to send admin notification:", error);
-//     res.status(500).json({ error: "Failed to notify admin" });
-//   }
-// });
-
-// // ✅ Mark order as completed and send email
-// router.put("/:id/complete", async (req, res) => {
-//   const { id } = req.params;
-
-//   try {
-//     // 1. Get the order info
-//     const [order] = await new Promise((resolve, reject) => {
-//       db.query(
-//         "SELECT * FROM orders WHERE order_id = ?",
-//         [id],
-//         (err, results) => {
-//           if (err) return reject(err);
-//           resolve(results);
-//         }
-//       );
-//     });
-
-//     if (!order) {
-//       return res.status(404).json({ error: "Order not found" });
-//     }
-
-//     // 2. Update status
-//     await new Promise((resolve, reject) => {
-//       db.query(
-//         "UPDATE orders SET status = 'Completed' WHERE order_id = ?",
-//         [id],
-//         (err) => {
-//           if (err) return reject(err);
-//           resolve();
-//         }
-//       );
-//     });
-
-//     // 3. Send confirmation email
-//     const transporter = nodemailer.createTransport({
-//       service: "gmail",
-//       auth: {
-//         user: process.env.EMAIL_USER,
-//         pass: process.env.EMAIL_PASS,
-//       },
-//     });
-
-//     await transporter.sendMail({
-//       from: `"NUVEL by Ali" <${process.env.EMAIL_USER}>`,
-//       to: order.email,
-//       subject: `Your Order #${order.order_id} is Completed and Shipped To You!`,
-//       text: `Hello,\n\nYour order #${order.order_id} has been completed. Thank you for shopping with us!\n\nBest regards,\nNUVEL by Ali`,
-//     });
-
-//     res.json({ message: "Order marked as completed and email sent" });
-//   } catch (err) {
-//     console.error("Error completing order:", err);
-//     res.status(500).json({ error: "Failed to complete order" });
-//   }
-// });
-
-// // Get order by ID (basic info only)
-// router.get("/orderId/:id", (req, res) => {
-//   const { id } = req.params;
-
-//   const query = "SELECT * FROM orders WHERE order_id = ?";
-
-//   db.query(query, [id], (err, results) => {
-//     if (err) {
-//       return res.status(500).send(err);
-//     }
-//     res.json(results);
-//   });
-// });
-
-// // Get full order info + products in one response
-// router.get("/:id/details", (req, res) => {
-//   const { id } = req.params;
-
-//   const orderQuery = `SELECT * FROM orders WHERE order_id = ?`;
-//   const productsQuery = `
-//     SELECT
-//       p.product_id,
-//       p.name AS product_name,
-//       p.price AS unit_price,
-//       ocp.total_products AS quantity,
-//       (p.price * ocp.total_products) AS subtotal,
-//       p.color,
-//       p.size
-//     FROM order_contains_product ocp
-//     JOIN products p ON ocp.product_id = p.product_id
-//     WHERE ocp.order_id = ?
-//   `;
-
-//   db.query(orderQuery, [id], (err, orderResults) => {
-//     if (err) {
-//       console.error("Error fetching order info:", err);
-//       return res.status(500).send("Error fetching order info");
-//     }
-
-//     if (!orderResults.length) {
-//       return res.status(404).json({ message: "Order not found" });
-//     }
-
-//     db.query(productsQuery, [id], (err2, productsResults) => {
-//       if (err2) {
-//         console.error("Error fetching order products:", err2);
-//         return res.status(500).send("Error fetching order products");
-//       }
-
-//       res.json({
-//         order: orderResults[0],
-//         products: productsResults,
-//       });
-//     });
-//   });
-// });
-
-// // Get orders by user email
-// router.get("/:email", (req, res) => {
-//   const { email } = req.params;
-
-//   const query = "SELECT * FROM orders WHERE email = ?";
-
-//   db.query(query, [email], (err, results) => {
-//     if (err) {
-//       return res.status(500).send(err);
-//     }
-//     res.json(results);
-//   });
-// });
-
-// // Create new order
-// router.post("/", (req, res) => {
-//   const { email, total_amount, order_date, order_time } = req.body;
-
-//   if (
-//     typeof email !== "string" ||
-//     typeof total_amount !== "number" ||
-//     typeof order_date !== "string" ||
-//     typeof order_time !== "string"
-//   ) {
-//     return res
-//       .status(400)
-//       .json({ error: "Invalid input types for order creation" });
-//   }
-
-//   const query =
-//     "INSERT INTO orders (email, total_amount, order_date, order_time) VALUES (?, ?, ?, ?)";
-
-//   db.query(
-//     query,
-//     [email, total_amount, order_date, order_time],
-//     (err, results) => {
-//       if (err) {
-//         console.error("Error creating order:", err);
-//         return res.status(500).send(err);
-//       }
-
-//       res.status(201).json({
-//         message: "Order created successfully",
-//         orderId: results.insertId,
-//       });
-//     }
-//   );
-// });
-
-// // Add products to an order (order_contains_product)
-// router.post("/:orderId/products", (req, res) => {
-//   const { orderId } = req.params;
-//   const { products, email } = req.body;
-
-//   if (!Array.isArray(products) || products.length === 0 || !email) {
-//     return res
-//       .status(400)
-//       .json({ error: "Products array and email are required" });
-//   }
-
-//   const values = products.map(({ product_id, quantity }) => [
-//     orderId,
-//     product_id,
-//     quantity,
-//   ]);
-
-//   const insertQuery = `
-//     INSERT INTO order_contains_product (order_id, product_id, total_products)
-//     VALUES ?
-//     ON DUPLICATE KEY UPDATE total_products = VALUES(total_products)
-//   `;
-
-//   db.query(insertQuery, [values], (err, result) => {
-//     if (err) {
-//       console.error("Error adding products to order:", err);
-//       return res.status(500).send("Error adding products to order");
-//     }
-
-//     // Clear the cart after order is processed
-//     const deleteQuery = "DELETE FROM cart WHERE user_email = ?";
-//     db.query(deleteQuery, [email], (deleteErr) => {
-//       if (deleteErr) {
-//         console.error("Error clearing cart:", deleteErr);
-//         return res.status(500).send("Order added but failed to clear cart");
-//       }
-
-//       res
-//         .status(201)
-//         .json({ message: "Order and products processed. Cart cleared." });
-//     });
-//   });
-// });
-
-// // Delete products by category safely (new route example)
-// // Deletes entries from order_contains_product first, then products
-// router.delete("/products/category/:categoryId", (req, res) => {
-//   const { categoryId } = req.params;
-
-//   // 1. Delete dependent order_contains_product entries first
-//   const deleteDependentQuery = `
-//     DELETE ocp FROM order_contains_product ocp
-//     JOIN products p ON ocp.product_id = p.product_id
-//     WHERE p.category_id = ?
-//   `;
-
-//   // 2. Delete products themselves
-//   const deleteProductsQuery = `DELETE FROM products WHERE category_id = ?`;
-
-//   db.query(deleteDependentQuery, [categoryId], (err) => {
-//     if (err) {
-//       console.error(
-//         "Error deleting dependent order_contains_product rows:",
-//         err
-//       );
-//       return res.status(500).send("Error deleting dependent rows");
-//     }
-
-//     db.query(deleteProductsQuery, [categoryId], (err2) => {
-//       if (err2) {
-//         console.error("Error deleting products:", err2);
-//         return res.status(500).send("Error deleting products");
-//       }
-
-//       res.json({
-//         message: `Deleted products and dependent rows for category ${categoryId}`,
-//       });
-//     });
-//   });
-// });
-
-// // 📊 Get order statistics
-// router.get("/stats/dashboard", (req, res) => {
-//   const statsQuery = `
-//     SELECT
-//       (SELECT name FROM products
-//        JOIN order_contains_product ocp ON products.product_id = ocp.product_id
-//        GROUP BY ocp.product_id
-//        ORDER BY SUM(ocp.total_products) DESC
-//        LIMIT 1) AS most_ordered_product,
-
-//       (SELECT SUM(total_amount) FROM orders) AS total_revenue,
-
-//       (SELECT COUNT(*) FROM orders) AS total_orders,
-
-//       (SELECT email FROM orders
-//        GROUP BY email
-//        ORDER BY COUNT(*) DESC
-//        LIMIT 1) AS most_active_customer
-//   `;
-
-//   db.query(statsQuery, (err, results) => {
-//     if (err) {
-//       console.error("Error fetching order statistics:", err);
-//       return res.status(500).send("Error fetching statistics");
-//     }
-
-//     res.json(results[0]);
-//   });
-// });
-
-// // Send order confirmation email
-// router.post("/send-confirmation", async (req, res) => {
-//   const { email, orderId } = req.body;
-
-//   if (!email || !orderId) {
-//     return res.status(400).json({ error: "Missing email or order ID" });
-//   }
-
-//   try {
-//     const transporter = nodemailer.createTransport({
-//       service: "gmail", // or your provider
-//       auth: {
-//         user: process.env.EMAIL_USER,
-//         pass: process.env.EMAIL_PASS,
-//       },
-//     });
-
-//     await transporter.sendMail({
-//       from: `"NUVEL by Ali" <${process.env.EMAIL_USER}>`,
-//       to: email,
-//       subject: `Your Order #${orderId} Confirmation`,
-//       text: `Thank you for your purchase!\n\nYour order number is: ${orderId}\n\nWe will notify you once your items ship.`,
-//     });
-
-//     res.status(200).json({ message: "Confirmation email sent" });
-//   } catch (err) {
-//     console.error("Failed to send email:", err);
-//     res.status(500).json({ error: "Failed to send email" });
-//   }
-// });
-
-// module.exports = router;
 const express = require("express");
 const router = express.Router();
 const dbSingleton = require("../dbSingleton");
 const db = dbSingleton.getConnection();
 const nodemailer = require("nodemailer");
+const ExcelJS = require("exceljs");
 
 // Helper to send emails using nodemailer
 async function sendEmail({ to, subject, text, html }) {
@@ -816,6 +445,185 @@ router.put("/:id/reject", async (req, res) => {
   } catch (err) {
     console.error("Error rejecting order:", err);
     res.status(500).json({ error: "Failed to reject order" });
+  }
+});
+
+// 📊 Revenue trend by month for chart
+router.get("/stats/revenue-trend", (req, res) => {
+  const trendQuery = `
+    SELECT 
+      DATE_FORMAT(order_date, '%Y-%m') AS month,
+      SUM(total_amount) AS revenue
+    FROM orders
+    GROUP BY DATE_FORMAT(order_date, '%Y-%m')
+    ORDER BY month ASC
+  `;
+
+  db.query(trendQuery, (err, results) => {
+    if (err) {
+      console.error("Error fetching revenue trend:", err);
+      return res.status(500).send("Error fetching revenue trend");
+    }
+
+    // Format results for chart
+    const formatted = results.map((r) => ({
+      month: r.month,
+      revenue: Number(r.revenue),
+    }));
+
+    res.json(formatted);
+  });
+});
+// Export stats to Excel between two dates
+router.get("/stats/export", async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    return res.status(400).json({ error: "startDate and endDate required" });
+  }
+
+  try {
+    // Fetch orders between dates
+    const query = `
+      SELECT o.order_id, o.email, o.total_amount, o.order_date, o.order_time,
+             p.product_id, p.name AS product_name, p.color, p.size,
+             ocp.total_products AS quantity, p.price AS unit_price
+      FROM orders o
+      JOIN order_contains_product ocp ON o.order_id = ocp.order_id
+      JOIN products p ON ocp.product_id = p.product_id
+      WHERE o.order_date BETWEEN ? AND ?
+      ORDER BY o.order_date, o.order_time
+    `;
+
+    db.query(query, [startDate, endDate], async (err, results) => {
+      if (err) return res.status(500).send(err);
+
+      // Check if we have any results
+      if (!results || results.length === 0) {
+        return res.status(404).json({
+          error: "No orders found for the selected date range.",
+        });
+      }
+
+      // Create Excel workbook
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Orders Report");
+
+      // Add header row
+      worksheet.columns = [
+        { header: "Order ID", key: "order_id", width: 10 },
+        { header: "Customer Email", key: "email", width: 25 },
+        { header: "Total Amount", key: "total_amount", width: 15 },
+        { header: "Order Date", key: "order_date", width: 15 },
+        { header: "Order Time", key: "order_time", width: 10 },
+        { header: "Product ID", key: "product_id", width: 25 },
+        { header: "Product Name", key: "product_name", width: 25 },
+        { header: "Color", key: "color", width: 10 },
+        { header: "Size", key: "size", width: 10 },
+        { header: "Quantity", key: "quantity", width: 10 },
+        { header: "Unit Price", key: "unit_price", width: 12 },
+        { header: "Subtotal", key: "subtotal", width: 12 },
+      ];
+
+      // Prepare rows with formatted date and calculated subtotal
+      const excelData = results.map((row) => ({
+        ...row,
+        order_date: new Date(row.order_date).toLocaleDateString(),
+        subtotal: row.unit_price * row.quantity,
+      }));
+
+      // Add all rows at once
+      worksheet.addRows(excelData);
+
+      // Write file to buffer
+      const buffer = await workbook.xlsx.writeBuffer();
+
+      // Send file as download
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=orders_${startDate}_to_${endDate}.xlsx`
+      );
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+
+      res.send(buffer);
+    });
+  } catch (err) {
+    console.error("Error exporting Excel:", err);
+    res.status(500).send("Failed to export Excel");
+  }
+});
+router.get("/stats/products", async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    return res.status(400).json({ error: "startDate and endDate required" });
+  }
+
+  try {
+    const query = `
+      SELECT p.product_id, p.name AS product_name,
+             SUM(ocp.total_products) AS total_quantity_sold,
+             SUM(ocp.total_products * p.price) AS total_revenue,
+             ROUND(AVG(p.price), 2) AS avg_price
+      FROM orders o
+      JOIN order_contains_product ocp ON o.order_id = ocp.order_id
+      JOIN products p ON ocp.product_id = p.product_id
+      WHERE o.order_date BETWEEN ? AND ?
+      GROUP BY p.product_id, p.name
+      ORDER BY total_revenue DESC
+    `;
+
+    db.query(query, [startDate, endDate], async (err, results) => {
+      if (err) return res.status(500).send(err);
+
+      // Check if we have data
+      if (!results || results.length === 0) {
+        return res.status(404).json({
+          error: "No product sales found for the selected date range.",
+        });
+      }
+
+      // Create Excel workbook
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Product Sales Summary");
+
+      // Add columns
+      worksheet.columns = [
+        { header: "Product ID", key: "product_id", width: 15 },
+        { header: "Product Name", key: "product_name", width: 30 },
+        {
+          header: "Total Quantity Sold",
+          key: "total_quantity_sold",
+          width: 20,
+        },
+        { header: "Total Revenue", key: "total_revenue", width: 20 },
+        { header: "Average Unit Price", key: "avg_price", width: 20 },
+      ];
+
+      // Add rows
+      worksheet.addRows(results);
+
+      // Write file to buffer
+      const buffer = await workbook.xlsx.writeBuffer();
+
+      // Send file as download
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=product_sales_${startDate}_to_${endDate}.xlsx`
+      );
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+
+      res.send(buffer);
+    });
+  } catch (err) {
+    console.error("Error exporting product sales Excel:", err);
+    res.status(500).send("Failed to export Excel");
   }
 });
 

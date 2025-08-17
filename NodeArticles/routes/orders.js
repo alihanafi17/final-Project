@@ -4,6 +4,8 @@ const dbSingleton = require("../dbSingleton");
 const db = dbSingleton.getConnection();
 const nodemailer = require("nodemailer");
 const ExcelJS = require("exceljs");
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
 
 // Helper to send emails using nodemailer
 async function sendEmail({ to, subject, text, html }) {
@@ -781,6 +783,173 @@ router.get("/export/:order_id", async (req, res) => {
     console.error("Error exporting single order Excel:", err);
     res.status(500).send("Failed to export order Excel.");
   }
+});
+
+router.get("/:orderId/pdf", (req, res) => {
+  const { orderId } = req.params;
+
+  const orderQuery = `
+    SELECT o.order_id, o.email, o.total_amount, o.order_date, o.order_time,
+           p.product_id, p.name AS product_name, p.color, p.size, p.price AS unit_price,
+           ocp.total_products
+    FROM orders o
+    JOIN order_contains_product ocp ON o.order_id = ocp.order_id
+    JOIN products p ON ocp.product_id = p.product_id
+    WHERE o.order_id = ?
+  `;
+
+  db.query(orderQuery, [orderId], (err, results) => {
+    if (err) return res.status(500).send("Database error: " + err);
+    if (results.length === 0) return res.status(404).send("Order not found");
+
+    const order = {
+      order_id: results[0].order_id,
+      email: results[0].email,
+      total_amount: Number(results[0].total_amount),
+      order_date: results[0].order_date,
+      order_time: results[0].order_time,
+    };
+
+    const products = results.map((p) => ({
+      product_id: p.product_id,
+      product_name: p.product_name,
+      color: p.color,
+      size: p.size,
+      quantity: p.total_products,
+      unit_price: Number(p.unit_price),
+      subtotal: Number(p.unit_price) * p.total_products,
+    }));
+
+    // Increased page width (800px) and reduced margin
+    const doc = new PDFDocument({ size: [800, 1000], margin: 30 });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="order_${order.order_id}.pdf"`
+    );
+
+    // Header
+    doc.fontSize(20).text("Nuvel By Ali - Order Receipt", { align: "center" });
+    doc.moveDown();
+    doc
+      .fontSize(12)
+      .text(`Order ID: ${order.order_id}`)
+      .text(`Customer Email: ${order.email}`)
+      .text(`Date: ${new Date(order.order_date).toLocaleDateString()}`)
+      .text(`Time: ${order.order_time}`)
+      .moveDown();
+
+    // Table
+    const tableTop = doc.y + 10;
+    const itemX = 30;
+    const rowHeight = 25;
+    const colWidths = [100, 200, 80, 60, 50, 80, 80]; // slightly wider columns
+
+    // Header
+    const headers = [
+      "ID",
+      "Name",
+      "Color",
+      "Size",
+      "Qty",
+      "Unit Price",
+      "Subtotal",
+    ];
+    headers.forEach((h, i) => {
+      doc
+        .rect(
+          itemX + colWidths.slice(0, i).reduce((a, b) => a + b, 0),
+          tableTop,
+          colWidths[i],
+          rowHeight
+        )
+        .stroke();
+      doc
+        .font("Helvetica-Bold")
+        .text(
+          h,
+          itemX + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + 3,
+          tableTop + 7,
+          {
+            width: colWidths[i] - 6,
+            align: i >= 4 ? "right" : "left",
+          }
+        );
+    });
+
+    // Rows
+    let y = tableTop + rowHeight;
+    products.forEach((p) => {
+      const values = [
+        p.product_id,
+        p.product_name,
+        p.color,
+        p.size,
+        p.quantity,
+        `$${p.unit_price.toFixed(2)}`,
+        `$${p.subtotal.toFixed(2)}`,
+      ];
+
+      values.forEach((v, i) => {
+        doc
+          .rect(
+            itemX + colWidths.slice(0, i).reduce((a, b) => a + b, 0),
+            y,
+            colWidths[i],
+            rowHeight
+          )
+          .stroke();
+
+        if (typeof v === "string" && v.length > 30) v = v.slice(0, 27) + "...";
+
+        doc
+          .font("Helvetica")
+          .text(
+            v,
+            itemX + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + 3,
+            y + 7,
+            {
+              width: colWidths[i] - 6,
+              align: i >= 4 ? "right" : "left",
+            }
+          );
+      });
+      y += rowHeight;
+    });
+
+    // Total row (right aligned)
+    doc
+      .rect(
+        itemX + colWidths.slice(0, 5).reduce((a, b) => a + b, 0),
+        y,
+        colWidths[5] + colWidths[6],
+        rowHeight
+      )
+      .stroke();
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(14)
+      .text(
+        "Total:",
+        itemX + colWidths.slice(0, 5).reduce((a, b) => a + b, 0) + 3,
+        y + 7
+      )
+      .text(
+        `$${order.total_amount.toFixed(2)}`,
+        itemX +
+          colWidths.slice(0, 5).reduce((a, b) => a + b, 0) +
+          colWidths[5] -
+          3,
+        y + 7,
+        {
+          width: colWidths[6],
+          align: "right",
+        }
+      );
+
+    doc.end();
+    doc.pipe(res);
+  });
 });
 
 module.exports = router;

@@ -127,7 +127,8 @@ function AdminAllUsers() {
         <h2>Order Details (ID: {order.order_id})</h2>
         <p>
           Customer: {order.email} | Total: ${order.total_amount} | Date:{" "}
-          {order.order_date} | Time: {order.order_time}
+          {new Date(order.order_date).toLocaleDateString()} | Time:{" "}
+          {order.order_time}
         </p>
         <table className={styles.orderDetailsTable}>
           <thead>
@@ -185,11 +186,21 @@ function AdminAllUsers() {
                 <tr key={order.order_id}>
                   <td>{order.order_id}</td>
                   <td>${order.total_amount}</td>
-                  <td>{order.order_date}</td>
+                  <td>{new Date(order.order_date).toLocaleDateString()}</td>
                   <td>{order.order_time}</td>
                   <td>
                     <button onClick={() => seeOrderDetails(order.order_id)}>
                       Order Details
+                    </button>
+                    <button
+                      onClick={() =>
+                        window.open(
+                          `http://localhost:8801/orders/${order.order_id}/pdf`,
+                          "_blank"
+                        )
+                      }
+                    >
+                      Download PDF
                     </button>
                   </td>
                 </tr>

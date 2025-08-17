@@ -23,7 +23,7 @@ const authenticateUser = (req, res, next) => {
 
 // ===== Get all users (admin only ideally) =====
 router.get("/", (req, res) => {
-  db.query("SELECT id, name, email, role FROM users", (err, users) => {
+  db.query("SELECT * FROM users", (err, users) => {
     if (err)
       return res.status(500).json({ message: "Database error", error: err });
     res.json(users);

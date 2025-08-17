@@ -1,0 +1,141 @@
+/* Container for all users view */
+.adminUsersContainer {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+/* Title */
+.adminUsersContainer h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+}
+
+/* Users table */
+.usersTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background-color: #fff;
+}
+.usersTable th,
+.usersTable td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+.usersTable th {
+  background-color: #f0f0f0;
+}
+.usersTable tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+/* Buttons inside table */
+.usersTable button {
+  padding: 5px 12px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #fff;
+  background-color: #82ca9d;
+  transition: background 0.2s;
+}
+.usersTable button:hover {
+  background-color: #72b387;
+}
+
+/* Back button for orders/details */
+.backButton {
+  padding: 5px 15px;
+  margin-bottom: 15px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.backButton:hover {
+  background-color: #ddd;
+}
+
+/* Orders table (user orders view) */
+.ordersTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background-color: #fff;
+}
+.ordersTable th,
+.ordersTable td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+.ordersTable th {
+  background-color: #f0f0f0;
+}
+.ordersTable tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+/* Order details table */
+.orderDetailsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background-color: #fff;
+}
+.orderDetailsTable th,
+.orderDetailsTable td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+.orderDetailsTable th {
+  background-color: #f0f0f0;
+}
+.orderDetailsTable tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+/* No data message */
+.noData {
+  font-style: italic;
+  color: #555;
+  margin-top: 10px;
+}
+.confirmPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmContent {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 300px;
+}
+
+.confirmButtons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.confirmButtons button {
+  padding: 5px 15px;
+  cursor: pointer;
+}

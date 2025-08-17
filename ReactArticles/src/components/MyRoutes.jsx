@@ -30,6 +30,7 @@ import Terms from "./terms/Terms";
 import AdminPending from "./adminPage/AdminPending";
 import AdminAllOrders from "./adminPage/AdminAllOrders";
 import AdminOrderStats from "./adminPage/AdminOrderStats";
+import AdminAllUsers from "./adminPage/AdminAllUsers";
 
 function MyRoutes() {
   const [products, setProducts] = useState([]);
@@ -99,6 +100,7 @@ function MyRoutes() {
         <Route path="/productForm" element={<ProductForm />} />
         <Route path="/adminPage/categories" element={<AdminCategories />} />
         <Route path="/adminPage/products" element={<AdminProducts />} />
+        <Route path="/adminPage/allUsers" element={<AdminAllUsers />} />
         <Route path="/adminPage/pending" element={<AdminPending />} />
         <Route path="/adminPage/allOrders" element={<AdminAllOrders />} />
         <Route path="/adminPage/orderStats" element={<AdminOrderStats />} />

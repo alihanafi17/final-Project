@@ -53,33 +53,64 @@
 //     }
 //   };
 
-//  const downloadExcel = async () => {
-//    if (!startDate || !endDate) {
-//      alert("Please select both start and end dates.");
-//      return;
-//    }
+//   const downloadExcel = async () => {
+//     if (!startDate || !endDate) {
+//       alert("Please select both start and end dates.");
+//       return;
+//     }
 
-//    try {
-//      const res = await axios.get(
-//        `http://localhost:8801/orders/stats/export?startDate=${startDate}&endDate=${endDate}`,
-//        { responseType: "blob" }
-//      );
+//     try {
+//       const res = await axios.get(
+//         `http://localhost:8801/orders/stats/export?startDate=${startDate}&endDate=${endDate}`,
+//         { responseType: "blob" }
+//       );
 
-//      const url = window.URL.createObjectURL(new Blob([res.data]));
-//      const link = document.createElement("a");
-//      link.href = url;
-//      link.setAttribute("download", `orders_${startDate}_to_${endDate}.xlsx`);
-//      document.body.appendChild(link);
-//      link.click();
-//      link.remove();
-//    } catch (err) {
-//      if (err.response && err.response.status === 404) {
-//        alert("No data found for the selected date range.");
-//      } else {
-//        console.error("Failed to download Excel:", err);
-//      }
-//    }
-//  };
+//       const url = window.URL.createObjectURL(new Blob([res.data]));
+//       const link = document.createElement("a");
+//       link.href = url;
+//       link.setAttribute("download", `orders_${startDate}_to_${endDate}.xlsx`);
+//       document.body.appendChild(link);
+//       link.click();
+//       link.remove();
+//     } catch (err) {
+//       if (err.response && err.response.status === 404) {
+//         alert("No data found for the selected date range.");
+//       } else {
+//         console.error("Failed to download Excel:", err);
+//       }
+//     }
+//   };
+
+//   const downloadProductExcel = async () => {
+//     if (!startDate || !endDate) {
+//       alert("Please select both start and end dates.");
+//       return;
+//     }
+
+//     try {
+//       const res = await axios.get(
+//         `http://localhost:8801/orders/stats/products?startDate=${startDate}&endDate=${endDate}`,
+//         { responseType: "blob" }
+//       );
+
+//       const url = window.URL.createObjectURL(new Blob([res.data]));
+//       const link = document.createElement("a");
+//       link.href = url;
+//       link.setAttribute(
+//         "download",
+//         `product_sales_${startDate}_to_${endDate}.xlsx`
+//       );
+//       document.body.appendChild(link);
+//       link.click();
+//       link.remove();
+//     } catch (err) {
+//       if (err.response && err.response.status === 404) {
+//         alert("No product sales found for the selected date range.");
+//       } else {
+//         console.error("Failed to download product Excel:", err);
+//       }
+//     }
+//   };
 
 //   if (loading)
 //     return <div className={styles.loading}>Loading statistics...</div>;
@@ -91,7 +122,7 @@
 //     <div className={styles.statsContainer}>
 //       <h2>Order Statistics</h2>
 
-//       {/* Date Range Picker & Download Button */}
+//       {/* Date Range Picker & Download Buttons */}
 //       <div className={styles.dateRangeContainer}>
 //         <label>
 //           Start Date:{" "}
@@ -110,7 +141,13 @@
 //           />
 //         </label>
 //         <button onClick={downloadExcel} className={styles.downloadButton}>
-//           Download Excel
+//           Download Orders Excel
+//         </button>
+//         <button
+//           onClick={downloadProductExcel}
+//           className={styles.downloadButton}
+//         >
+//           Download Product Summary Excel
 //         </button>
 //       </div>
 
@@ -230,6 +267,7 @@ function AdminOrderStats() {
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [orderId, setOrderId] = useState(""); // New state for single order
 
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
@@ -319,9 +357,37 @@ function AdminOrderStats() {
     }
   };
 
+  // New function: Download a specific order Excel
+  const downloadSingleOrderExcel = async () => {
+    if (!orderId) {
+      alert("Please enter an order ID.");
+      return;
+    }
+
+    try {
+      const res = await axios.get(
+        `http://localhost:8801/orders/export/${orderId}`,
+        { responseType: "blob" }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `order_${orderId}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        alert("Order not found.");
+      } else {
+        console.error("Failed to download single order Excel:", err);
+      }
+    }
+  };
+
   if (loading)
     return <div className={styles.loading}>Loading statistics...</div>;
-
   if (!stats)
     return <div className={styles.loading}>No statistics available.</div>;
 
@@ -355,6 +421,24 @@ function AdminOrderStats() {
           className={styles.downloadButton}
         >
           Download Product Summary Excel
+        </button>
+      </div>
+
+      {/* Single Order Excel Download */}
+      <div className={styles.singleOrderContainer}>
+        <label>
+          Order ID:{" "}
+          <input
+            type="text"
+            value={orderId}
+            onChange={(e) => setOrderId(e.target.value)}
+          />
+        </label>
+        <button
+          onClick={downloadSingleOrderExcel}
+          className={styles.downloadButton}
+        >
+          Download Single Order Excel
         </button>
       </div>
 

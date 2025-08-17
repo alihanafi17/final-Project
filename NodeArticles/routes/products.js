@@ -52,7 +52,7 @@ router.get("/:id", (req, res) => {
 // ✅ Get product by product_ID
 router.get("/product-id/:product_id", (req, res) => {
   const { product_id } = req.params;
-  const query = "SELECT * FROM products WHERE product_id=?";
+  const query = "SELECT * FROM products WHERE product_id=? ";
   db.query(query, [product_id], (err, results) => {
     if (err) return res.status(500).json({ error: err });
     res.json(results);
@@ -181,13 +181,33 @@ router.post("/update-quantities", (req, res) => {
     });
 });
 
-// ✅ Delete a product
-router.delete("/:product_id", (req, res) => {
+// Hide product (soft delete)
+router.put("/:product_id/hide", (req, res) => {
   const { product_id } = req.params;
-  const query = "DELETE FROM products WHERE product_id = ?";
+  const query = "UPDATE products SET is_active = FALSE WHERE product_id = ?";
   db.query(query, [product_id], (err, results) => {
     if (err) return res.status(500).json({ error: err });
-    res.json({ message: "Product deleted!" });
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "Product not found!" });
+    }
+
+    res.json({ message: "Product hidden successfully!" });
+  });
+});
+
+// Unhide product (restore)
+router.put("/:product_id/show", (req, res) => {
+  const { product_id } = req.params;
+  const query = "UPDATE products SET is_active = TRUE WHERE product_id = ?";
+  db.query(query, [product_id], (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "Product not found!" });
+    }
+
+    res.json({ message: "Product restored successfully!" });
   });
 });
 

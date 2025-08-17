@@ -320,7 +320,8 @@ function ProductPage() {
           <div className={classes.sizeOptions}>
             {productData.map(
               (product) =>
-                product.color === selectedColor && (
+                product.color === selectedColor &&
+                product.is_active === 1 && (
                   <button
                     type="button"
                     key={product.size}

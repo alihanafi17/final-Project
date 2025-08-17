@@ -205,16 +205,7 @@
 //                 try {
 //                   const orderId = await createOrderAndAddProducts();
 
-//                   // Update quantities
-//                   await axios.post(
-//                     "http://localhost:8801/products/update-quantities",
-//                     {
-//                       products: cartItems.map((item) => ({
-//                         product_id: item.product_id,
-//                         quantity: item.quantity,
-//                       })),
-//                     }
-//                   );
+//                   // **Remove quantity update here — admin confirmation will handle it**
 
 //                   // Clear the cart
 //                   await axios.delete(`http://localhost:8801/cart/${email}/all`);
@@ -234,10 +225,13 @@
 //                   );
 
 //                   // Notify admin
-//                   await axios.post("http://localhost:8801/orders/notify-admin", {
-//                     orderId,
-//                     customerEmail: email,
-//                   });
+//                   await axios.post(
+//                     "http://localhost:8801/orders/notify-admin",
+//                     {
+//                       orderId,
+//                       customerEmail: email,
+//                     }
+//                   );
 //                 } catch (err) {
 //                   console.error("Order processing error:", err);
 //                   alert("Failed to process order. Please contact support.");
@@ -260,6 +254,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { checkAuth } from "../../auth";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import styles from "./cartPage.module.css";
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
@@ -366,11 +361,11 @@ function CartPage() {
     }
   };
 
-  if (loading) return <div style={{ padding: "2rem" }}>Loading cart...</div>;
+  if (loading) return <div className={styles.loading}>Loading cart...</div>;
 
   if (error) {
     return (
-      <div style={{ padding: "2rem" }}>
+      <div className={styles.container}>
         <h2>Your Cart</h2>
         <p>{error}</p>
       </div>
@@ -379,7 +374,7 @@ function CartPage() {
 
   if (cartItems.length === 0) {
     return (
-      <div style={{ padding: "2rem" }}>
+      <div className={styles.container}>
         <h2>Your Cart</h2>
         <p>No products in cart yet.</p>
       </div>
@@ -387,121 +382,125 @@ function CartPage() {
   }
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h2>Your Cart</h2>
-      {cartItems.map((item) => (
-        <div
-          key={item.product_id}
-          style={{
-            marginBottom: "1rem",
-            border: "1px solid #ccc",
-            padding: "1rem",
-            borderRadius: "5px",
-          }}
-        >
-          <h3>{item.name || `Product ID: ${item.product_id}`}</h3>
-          <p>
-            <strong>Size:</strong> {item.size}
-          </p>
-          <p>
-            <strong>Color:</strong> {item.color}
-          </p>
-          <p>
-            <strong>Quantity:</strong> {item.quantity}
-          </p>
-          <p>
-            <strong>Price per item:</strong> ${Number(item.price).toFixed(2)}
-          </p>
-          <p>
-            <strong>Subtotal:</strong> $
-            {(item.price * item.quantity).toFixed(2)}
-          </p>
-          <button
-            onClick={() => handleDelete(item.product_id)}
-            style={{
-              backgroundColor: "#e74c3c",
-              color: "white",
-              border: "none",
-              padding: "0.5rem 1rem",
-              cursor: "pointer",
-              borderRadius: "3px",
+    <div className={styles.container}>
+      <h2 className={styles.title}>Your Cart</h2>
+
+      <div className={styles.cartList}>
+        {cartItems.map((item) => (
+          <div key={item.product_id} className={styles.cartItem}>
+            <div className={styles.itemImage}>
+              {/* Placeholder image for now */}
+              <img
+                src={
+                  `/uploads//${item.image}` || "https://via.placeholder.com/100"
+                }
+                alt={item.name || `Product ${item.product_id}`}
+              />
+            </div>
+
+            <div className={styles.itemDetails}>
+              <h3 className={styles.itemName}>
+                {item.name || `Product ID: ${item.product_id}`}
+              </h3>
+              <p>
+                <strong>Size:</strong> {item.size}
+              </p>
+              <p>
+                <strong>Color:</strong> {item.color}
+              </p>
+              <p>
+                <strong>Quantity:</strong> {item.quantity}
+              </p>
+              <p>
+                <strong>Price per item:</strong> $
+                {Number(item.price).toFixed(2)}
+              </p>
+              <p>
+                <strong>Subtotal:</strong> $
+                {(item.price * item.quantity).toFixed(2)}
+              </p>
+            </div>
+
+            <div className={styles.itemActions}>
+              <button
+                className={styles.deleteButton}
+                onClick={() => handleDelete(item.product_id)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.cartSummary}>
+        <h3>Total Price: ${totalPrice.toFixed(2)}</h3>
+
+        <div className={styles.paypalSection}>
+          <PayPalScriptProvider
+            options={{
+              "client-id":
+                "ASWJzRBNnnkZOUQpFSMBa9TrMo24D9FV7HpbCtlIXysgMt2L-I9z0N6bfEDUHbNnFHwkmuz7HmBVI7O2",
             }}
           >
-            Delete
-          </button>
-        </div>
-      ))}
-
-      <hr />
-      <h3>Total Price: ${totalPrice.toFixed(2)}</h3>
-
-      <div style={{ marginTop: "2rem" }}>
-        <PayPalScriptProvider
-          options={{
-            "client-id":
-              "ASWJzRBNnnkZOUQpFSMBa9TrMo24D9FV7HpbCtlIXysgMt2L-I9z0N6bfEDUHbNnFHwkmuz7HmBVI7O2",
-          }}
-        >
-          <PayPalButtons
-            style={{ layout: "vertical" }}
-            createOrder={(data, actions) => {
-              return actions.order.create({
-                purchase_units: [
-                  {
-                    amount: {
-                      value: totalPrice.toFixed(2),
+            <PayPalButtons
+              style={{ layout: "vertical" }}
+              createOrder={(data, actions) => {
+                return actions.order.create({
+                  purchase_units: [
+                    {
+                      amount: {
+                        value: totalPrice.toFixed(2),
+                      },
                     },
-                  },
-                ],
-              });
-            }}
-            onApprove={(data, actions) => {
-              return actions.order.capture().then(async (details) => {
-                alert(
-                  `Transaction completed by ${details.payer.name.given_name}`
-                );
-                try {
-                  const orderId = await createOrderAndAddProducts();
-
-                  // **Remove quantity update here — admin confirmation will handle it**
-
-                  // Clear the cart
-                  await axios.delete(`http://localhost:8801/cart/${email}/all`);
-
-                  // Send confirmation email to customer
-                  await axios.post(
-                    "http://localhost:8801/orders/send-confirmation",
-                    {
-                      email,
-                      orderId,
-                    }
-                  );
-
-                  setCartItems([]);
+                  ],
+                });
+              }}
+              onApprove={(data, actions) => {
+                return actions.order.capture().then(async (details) => {
                   alert(
-                    `Order placed and cart cleared! A confirmation email was sent to ${email}. Admin has been notified.`
+                    `Transaction completed by ${details.payer.name.given_name}`
                   );
+                  try {
+                    const orderId = await createOrderAndAddProducts();
 
-                  // Notify admin
-                  await axios.post(
-                    "http://localhost:8801/orders/notify-admin",
-                    {
-                      orderId,
-                      customerEmail: email,
-                    }
-                  );
-                } catch (err) {
-                  console.error("Order processing error:", err);
-                  alert("Failed to process order. Please contact support.");
-                }
-              });
-            }}
-            onError={(err) => {
-              console.error("PayPal Checkout Error:", err);
-              alert("Payment failed. Please try again.");
-            }}
-          />
-        </PayPalScriptProvider>
+                    await axios.delete(
+                      `http://localhost:8801/cart/${email}/all`
+                    );
+
+                    await axios.post(
+                      "http://localhost:8801/orders/send-confirmation",
+                      {
+                        email,
+                        orderId,
+                      }
+                    );
+
+                    setCartItems([]);
+                    alert(
+                      `Order placed and cart cleared! A confirmation email was sent to ${email}. Admin has been notified.`
+                    );
+
+                    await axios.post(
+                      "http://localhost:8801/orders/notify-admin",
+                      {
+                        orderId,
+                        customerEmail: email,
+                      }
+                    );
+                  } catch (err) {
+                    console.error("Order processing error:", err);
+                    alert("Failed to process order. Please contact support.");
+                  }
+                });
+              }}
+              onError={(err) => {
+                console.error("PayPal Checkout Error:", err);
+                alert("Payment failed. Please try again.");
+              }}
+            />
+          </PayPalScriptProvider>
+        </div>
       </div>
     </div>
   );

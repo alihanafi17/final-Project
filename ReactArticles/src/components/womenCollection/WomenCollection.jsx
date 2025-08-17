@@ -5,7 +5,7 @@ function WomenCollection({ products }) {
   const [sortOption, setSortOption] = useState("default");
 
   const filteredProducts = products.filter(
-    (product) => product.category_id === 2
+    (product) => product.category_id === 2 && product.is_active === 1
   );
 
   // Sort products based on selected option

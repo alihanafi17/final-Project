@@ -4,7 +4,8 @@
 // import AdminCategories from "./AdminCategories";
 // import AdminProducts from "./AdminProducts";
 // import AdminPending from "./AdminPending";
-// import AdminAllOrders from "./AdminAllOrders"; // NEW COMPONENT
+// import AdminAllOrders from "./AdminAllOrders"; // Orders with products
+// import AdminOrderStats from "./AdminOrderStats"; // NEW COMPONENT
 
 // function AdminPage() {
 //   const [categories, setCategories] = useState([]);
@@ -21,7 +22,7 @@
 //   const [currentMode, setCurrentMode] = useState("grouped");
 //   const [currentVariants, setCurrentVariants] = useState([]);
 
-//   const [viewMode, setViewMode] = useState("pending"); // pending | allOrders | products
+//   const [viewMode, setViewMode] = useState("pending"); // pending | allOrders | products | stats
 
 //   useEffect(() => {
 //     fetchCategories();
@@ -151,16 +152,20 @@
 //           >
 //             Manage Products
 //           </button>
+//           <button
+//             className={
+//               viewMode === "stats" ? styles.activeButton : styles.navButton
+//             }
+//             onClick={() => setViewMode("stats")}
+//           >
+//             Order Statistics
+//           </button>
 //         </div>
 //       </div>
 
-//       {/* Pending Orders View */}
+//       {/* Views */}
 //       {viewMode === "pending" && <AdminPending />}
-
-//       {/* All Orders View */}
 //       {viewMode === "allOrders" && <AdminAllOrders />}
-
-//       {/* Products View */}
 //       {viewMode === "products" && (
 //         <>
 //           {/* Filters */}
@@ -212,6 +217,7 @@
 //           </div>
 //         </>
 //       )}
+//       {viewMode === "stats" && <AdminOrderStats />}
 //     </div>
 //   );
 // }
@@ -224,7 +230,8 @@ import AdminCategories from "./AdminCategories";
 import AdminProducts from "./AdminProducts";
 import AdminPending from "./AdminPending";
 import AdminAllOrders from "./AdminAllOrders"; // Orders with products
-import AdminOrderStats from "./AdminOrderStats"; // NEW COMPONENT
+import AdminOrderStats from "./AdminOrderStats"; // Stats component
+import AdminAllUsers from "./AdminAllUsers"; // NEW COMPONENT
 
 function AdminPage() {
   const [categories, setCategories] = useState([]);
@@ -241,7 +248,7 @@ function AdminPage() {
   const [currentMode, setCurrentMode] = useState("grouped");
   const [currentVariants, setCurrentVariants] = useState([]);
 
-  const [viewMode, setViewMode] = useState("pending"); // pending | allOrders | products | stats
+  const [viewMode, setViewMode] = useState("pending"); // pending | allOrders | products | stats | users
 
   useEffect(() => {
     fetchCategories();
@@ -379,6 +386,14 @@ function AdminPage() {
           >
             Order Statistics
           </button>
+          <button
+            className={
+              viewMode === "users" ? styles.activeButton : styles.navButton
+            }
+            onClick={() => setViewMode("users")}
+          >
+            All Users
+          </button>
         </div>
       </div>
 
@@ -387,7 +402,6 @@ function AdminPage() {
       {viewMode === "allOrders" && <AdminAllOrders />}
       {viewMode === "products" && (
         <>
-          {/* Filters */}
           <div className={styles.filters}>
             <label>
               Color:
@@ -437,6 +451,7 @@ function AdminPage() {
         </>
       )}
       {viewMode === "stats" && <AdminOrderStats />}
+      {viewMode === "users" && <AdminAllUsers />}
     </div>
   );
 }

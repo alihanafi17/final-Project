@@ -106,17 +106,13 @@ router.get("/check-auth", authenticateUser, (req, res) => {
 // ===== Get user by email =====
 router.get("/:email", (req, res) => {
   const { email } = req.params;
-  db.query(
-    "SELECT id, name, email, role, address, phone FROM users WHERE email = ?",
-    [email],
-    (err, users) => {
-      if (err)
-        return res.status(500).json({ message: "Database error", error: err });
-      if (users.length === 0)
-        return res.status(404).json({ message: "User not found" });
-      res.json(users[0]);
-    }
-  );
+  db.query("SELECT * FROM users WHERE email = ?", [email], (err, users) => {
+    if (err)
+      return res.status(500).json({ message: "Database error", error: err });
+    if (users.length === 0)
+      return res.status(404).json({ message: "User not found" });
+    res.json(users[0]);
+  });
 });
 
 // ===== Register user =====
@@ -175,10 +171,9 @@ router.post("/", (req, res) => {
   );
 });
 
-// ===== Update user =====
 router.put("/:email", (req, res) => {
   const { email } = req.params;
-  const { name, address, phone, password } = req.body;
+  const { name, address, phone, password, role } = req.body; // <-- added role
 
   db.query("SELECT id FROM users WHERE email = ?", [email], (err, users) => {
     if (err)
@@ -189,6 +184,11 @@ router.put("/:email", (req, res) => {
     const updateUser = (hashedPass = null) => {
       let query = "UPDATE users SET name = ?, address = ?, phone = ?";
       const params = [name, address, phone];
+
+      if (role) {
+        query += ", role = ?";
+        params.push(role);
+      }
 
       if (hashedPass) {
         query += ", password = ?";

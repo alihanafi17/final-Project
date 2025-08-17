@@ -25,15 +25,48 @@
 
 //   const [variantProducts, setVariantProducts] = useState(null);
 
-//   // Auto-clear message after 5 seconds when message changes
+//   // New states for filtering
+//   const [filterColor, setFilterColor] = useState("");
+//   const [filterSize, setFilterSize] = useState("");
+//   const [displayedProducts, setDisplayedProducts] = useState([]);
+
+//   // Update displayedProducts whenever products, variantProducts, or filters change
 //   useEffect(() => {
-//     if (message?.text) {
-//       const timer = setTimeout(() => {
-//         onShowMessage({ text: "", type: "" });
-//       }, 5000);
-//       return () => clearTimeout(timer);
+//     let listToFilter = variantProducts || products;
+
+//     // If showing main products and a category is selected, filter by category
+//     if (!variantProducts && selectedCategory) {
+//       listToFilter = listToFilter.filter(
+//         (p) => String(p.category_id) === String(selectedCategory.category_id)
+//       );
 //     }
-//   }, [message, onShowMessage]);
+
+//     // Apply color filter if set (only applies to variants)
+//     if (variantProducts && filterColor.trim() !== "") {
+//       listToFilter = listToFilter.filter(
+//         (p) =>
+//           p.color &&
+//           p.color.toLowerCase().includes(filterColor.trim().toLowerCase())
+//       );
+//     }
+
+//     // Apply size filter if set (only applies to variants)
+//     if (variantProducts && filterSize.trim() !== "") {
+//       listToFilter = listToFilter.filter(
+//         (p) =>
+//           p.size &&
+//           p.size.toLowerCase().includes(filterSize.trim().toLowerCase())
+//       );
+//     }
+
+//     setDisplayedProducts(listToFilter);
+//   }, [products, variantProducts, filterColor, filterSize, selectedCategory]);
+
+//   // Clear filters when switching between variants and main products
+//   useEffect(() => {
+//     setFilterColor("");
+//     setFilterSize("");
+//   }, [variantProducts]);
 
 //   const handleInputChange = (e) => {
 //     const { name, value, files } = e.target;
@@ -131,7 +164,7 @@
 //         <h2>
 //           {selectedCategory ? selectedCategory.category_name : "All Products"}
 //         </h2>
-//         {selectedCategory && !formVisible && (
+//         {selectedCategory && !formVisible && !variantProducts && (
 //           <button
 //             className={styles.addProductButton}
 //             onClick={() => {
@@ -156,7 +189,33 @@
 //         )}
 //       </div>
 
-//       {formVisible && (
+//       {/* Show filters ONLY when showing variants */}
+//       {!formVisible && variantProducts && (
+//         <div
+//           className={styles.filterContainer}
+//         >
+//           <label>
+//             Filter Color:{" "}
+//             <input
+//               type="text"
+//               value={filterColor}
+//               onChange={(e) => setFilterColor(e.target.value)}
+//               placeholder="e.g. red"
+//             />
+//           </label>
+//           <label>
+//             Filter Size:{" "}
+//             <input
+//               type="text"
+//               value={filterSize}
+//               onChange={(e) => setFilterSize(e.target.value)}
+//               placeholder="e.g. M"
+//             />
+//           </label>
+//         </div>
+//       )}
+
+//       {formVisible ? (
 //         <form
 //           className={styles.formContainer}
 //           onSubmit={handleSubmit}
@@ -268,9 +327,7 @@
 //             </button>
 //           </div>
 //         </form>
-//       )}
-
-//       {!formVisible && variantProducts ? (
+//       ) : variantProducts ? (
 //         <>
 //           <button
 //             className={styles.backButton}
@@ -281,59 +338,34 @@
 //           </button>
 //           <h3>Variants for Id: {variantProducts[0]?.id}</h3>
 //           <div className={styles.productsGrid}>
-//             {variantProducts.map((product) => (
-//               <div key={product.product_id} className={styles.productCard}>
-//                 <h3>{product.name}</h3>
-//                 <p className={styles.productDescription}>
-//                   {product.description}
-//                 </p>
-//                 <div className={styles.productDetails}>
-//                   <p>
-//                     <strong>Size:</strong> {product.size}
-//                   </p>
-//                   <p>
-//                     <strong>Color:</strong> {product.color}
-//                   </p>
-//                   <p>
-//                     <strong>Price:</strong> ${Number(product.price).toFixed(2)}
-//                   </p>
-//                   <p>
-//                     <strong>Quantity:</strong> {product.quantity}
-//                   </p>
-//                 </div>
-//                 <div className={styles.productActions}>
-//                   <button
-//                     className={styles.editButton}
-//                     onClick={() => handleEdit(product)}
-//                     type="button"
-//                   >
-//                     Edit
-//                   </button>
-//                   <button
-//                     className={styles.deleteButton}
-//                     onClick={() => handleDelete(product.product_id)}
-//                     type="button"
-//                   >
-//                     Delete
-//                   </button>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </>
-//       ) : (
-//         !formVisible && (
-//           <div className={styles.productsGrid}>
-//             {products.length === 0 ? (
-//               <p className={styles.noProducts}>No products found.</p>
+//             {displayedProducts.length === 0 ? (
+//               <p className={styles.noProducts}>
+//                 No variants match your filter.
+//               </p>
 //             ) : (
-//               products.map((product) => (
+//               displayedProducts.map((product) => (
 //                 <div key={product.product_id} className={styles.productCard}>
 //                   <h3>{product.name}</h3>
-//                   <h3>Id: {product.id}</h3>
-//                   <div className={styles.productDetails}></div>
+//                   <p className={styles.productDescription}>
+//                     {product.description}
+//                   </p>
+//                   <div className={styles.productDetails}>
+//                     <p>
+//                       <strong>Size:</strong> {product.size}
+//                     </p>
+//                     <p>
+//                       <strong>Color:</strong> {product.color}
+//                     </p>
+//                     <p>
+//                       <strong>Price:</strong> $
+//                       {Number(product.price).toFixed(2)}
+//                     </p>
+//                     <p>
+//                       <strong>Quantity:</strong> {product.quantity}
+//                     </p>
+//                   </div>
 //                   <div className={styles.productActions}>
-//                     {/* <button
+//                     <button
 //                       className={styles.editButton}
 //                       onClick={() => handleEdit(product)}
 //                       type="button"
@@ -346,22 +378,38 @@
 //                       type="button"
 //                     >
 //                       Delete
-//                     </button> */}
-//                     <button
-//                       className={styles.variantButton}
-//                       onClick={() => handleShowVariants(product)}
-//                       type="button"
-//                       title="Show all variants of this product"
-//                       style={{ marginLeft: "8px" }}
-//                     >
-//                       Show Variants
 //                     </button>
 //                   </div>
 //                 </div>
 //               ))
 //             )}
 //           </div>
-//         )
+//         </>
+//       ) : (
+//         <div className={styles.productsGrid}>
+//           {displayedProducts.length === 0 ? (
+//             <p className={styles.noProducts}>No products found.</p>
+//           ) : (
+//             displayedProducts.map((product) => (
+//               <div key={product.product_id} className={styles.productCard}>
+//                 <h3>{product.name}</h3>
+//                 <h3>Id: {product.id}</h3>
+//                 <div className={styles.productDetails}></div>
+//                 <div className={styles.productActions}>
+//                   <button
+//                     className={styles.variantButton}
+//                     onClick={() => handleShowVariants(product)}
+//                     type="button"
+//                     title="Show all variants of this product"
+//                     style={{ marginLeft: "8px" }}
+//                   >
+//                     Show Variants
+//                   </button>
+//                 </div>
+//               </div>
+//             ))
+//           )}
+//         </div>
 //       )}
 //     </main>
 //   );
@@ -462,18 +510,31 @@ function AdminProducts({
     setFormVisible(true);
   };
 
-  const handleDelete = (product_id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) {
-      return; // User cancelled delete
+  // ✅ Hide product
+  const handleHide = (product_id) => {
+    if (!window.confirm("Are you sure you want to hide this product?")) {
+      return;
     }
     axios
-      .delete(`http://localhost:8801/products/${product_id}`)
+      .put(`http://localhost:8801/products/${product_id}/hide`)
       .then(() => {
-        onShowMessage({ text: "Product deleted", type: "success" });
+        onShowMessage({ text: "Product hidden", type: "success" });
         onRefresh();
         setVariantProducts(null);
       })
-      .catch(() => onShowMessage({ text: "Delete failed", type: "error" }));
+      .catch(() => onShowMessage({ text: "Hide failed", type: "error" }));
+  };
+
+  // ✅ Unhide product
+  const handleUnhide = (product_id) => {
+    axios
+      .put(`http://localhost:8801/products/${product_id}/show`)
+      .then(() => {
+        onShowMessage({ text: "Product restored", type: "success" });
+        onRefresh();
+        setVariantProducts(null);
+      })
+      .catch(() => onShowMessage({ text: "Unhide failed", type: "error" }));
   };
 
   const handleSubmit = (e) => {
@@ -561,10 +622,7 @@ function AdminProducts({
 
       {/* Show filters ONLY when showing variants */}
       {!formVisible && variantProducts && (
-        <div
-          className={styles.filterContainer}
-          style={{ marginBottom: "1rem", display: "flex", gap: "1rem" }}
-        >
+        <div className={styles.filterContainer}>
           <label>
             Filter Color:{" "}
             <input
@@ -743,13 +801,23 @@ function AdminProducts({
                     >
                       Edit
                     </button>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={() => handleDelete(product.product_id)}
-                      type="button"
-                    >
-                      Delete
-                    </button>
+                    {product.is_active ? (
+                      <button
+                        className={styles.deleteButton}
+                        onClick={() => handleHide(product.product_id)}
+                        type="button"
+                      >
+                        Hide
+                      </button>
+                    ) : (
+                      <button
+                        className={styles.deleteButton}
+                        onClick={() => handleUnhide(product.product_id)}
+                        type="button"
+                      >
+                        Unhide
+                      </button>
+                    )}
                   </div>
                 </div>
               ))

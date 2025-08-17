@@ -474,7 +474,7 @@ router.get("/stats/revenue-trend", (req, res) => {
     res.json(formatted);
   });
 });
-// Export stats to Excel between two dates
+// Export stats to Excel (one order per row, all products in one cell)
 router.get("/stats/export", async (req, res) => {
   const { startDate, endDate } = req.query;
 
@@ -483,11 +483,19 @@ router.get("/stats/export", async (req, res) => {
   }
 
   try {
-    // Fetch orders between dates
     const query = `
-      SELECT o.order_id, o.email, o.total_amount, o.order_date, o.order_time,
-             p.product_id, p.name AS product_name, p.color, p.size,
-             ocp.total_products AS quantity, p.price AS unit_price
+      SELECT 
+        o.order_id,
+        o.email,
+        o.total_amount,
+        o.order_date,
+        o.order_time,
+        p.product_id,
+        p.name AS product_name,
+        p.color,
+        p.size,
+        ocp.total_products AS quantity,
+        p.price AS unit_price
       FROM orders o
       JOIN order_contains_product ocp ON o.order_id = ocp.order_id
       JOIN products p ON ocp.product_id = p.product_id
@@ -497,48 +505,71 @@ router.get("/stats/export", async (req, res) => {
 
     db.query(query, [startDate, endDate], async (err, results) => {
       if (err) return res.status(500).send(err);
-
-      // Check if we have any results
       if (!results || results.length === 0) {
-        return res.status(404).json({
-          error: "No orders found for the selected date range.",
-        });
+        return res
+          .status(404)
+          .json({ error: "No orders found for the selected date range." });
       }
 
-      // Create Excel workbook
+      // Group products by order_id
+      const ordersMap = {};
+      results.forEach((row) => {
+        if (!ordersMap[row.order_id]) {
+          ordersMap[row.order_id] = {
+            order_id: row.order_id,
+            email: row.email,
+            total_amount: row.total_amount,
+            order_date: new Date(row.order_date).toLocaleDateString(),
+            order_time: row.order_time,
+            products: [],
+          };
+        }
+        ordersMap[row.order_id].products.push({
+          product_id: row.product_id,
+          name: row.product_name,
+          color: row.color,
+          size: row.size,
+          quantity: row.quantity,
+          unit_price: row.unit_price,
+          subtotal: row.unit_price * row.quantity,
+        });
+      });
+
+      const orders = Object.values(ordersMap);
+
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Orders Report");
 
-      // Add header row
+      // Columns
       worksheet.columns = [
         { header: "Order ID", key: "order_id", width: 10 },
         { header: "Customer Email", key: "email", width: 25 },
         { header: "Total Amount", key: "total_amount", width: 15 },
         { header: "Order Date", key: "order_date", width: 15 },
         { header: "Order Time", key: "order_time", width: 10 },
-        { header: "Product ID", key: "product_id", width: 25 },
-        { header: "Product Name", key: "product_name", width: 25 },
-        { header: "Color", key: "color", width: 10 },
-        { header: "Size", key: "size", width: 10 },
-        { header: "Quantity", key: "quantity", width: 10 },
-        { header: "Unit Price", key: "unit_price", width: 12 },
-        { header: "Subtotal", key: "subtotal", width: 12 },
+        { header: "Products", key: "products_info", width: 100 },
       ];
 
-      // Prepare rows with formatted date and calculated subtotal
-      const excelData = results.map((row) => ({
-        ...row,
-        order_date: new Date(row.order_date).toLocaleDateString(),
-        subtotal: row.unit_price * row.quantity,
-      }));
+      // Rows
+      const excelData = orders.map((order) => {
+        const productsInfo = order.products
+          .map(
+            (p) =>
+              `ID: ${p.product_id}, Name: ${p.name}, Color: ${p.color}, Size: ${p.size}, Qty: ${p.quantity}, Price: $${p.unit_price}, Subtotal: $${p.subtotal}`
+          )
+          .join("\n"); // Each product on a new line
+        return {
+          ...order,
+          products_info: productsInfo,
+        };
+      });
 
-      // Add all rows at once
       worksheet.addRows(excelData);
 
-      // Write file to buffer
-      const buffer = await workbook.xlsx.writeBuffer();
+      // Optional: wrap text for the Products column
+      worksheet.getColumn("products_info").alignment = { wrapText: true };
 
-      // Send file as download
+      const buffer = await workbook.xlsx.writeBuffer();
       res.setHeader(
         "Content-Disposition",
         `attachment; filename=orders_${startDate}_to_${endDate}.xlsx`
@@ -547,7 +578,6 @@ router.get("/stats/export", async (req, res) => {
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       );
-
       res.send(buffer);
     });
   } catch (err) {
@@ -555,6 +585,7 @@ router.get("/stats/export", async (req, res) => {
     res.status(500).send("Failed to export Excel");
   }
 });
+
 router.get("/stats/products", async (req, res) => {
   const { startDate, endDate } = req.query;
 
@@ -649,6 +680,106 @@ router.get("/by-date", async (req, res) => {
   } catch (err) {
     console.error("Error fetching orders by date range:", err);
     res.status(500).send("Failed to fetch orders by date range");
+  }
+});
+
+// Export a single order to Excel (all products in one row/column)
+router.get("/export/:order_id", async (req, res) => {
+  const { order_id } = req.params;
+
+  if (!order_id) {
+    return res.status(400).json({ error: "order_id is required." });
+  }
+
+  try {
+    const query = `
+      SELECT 
+        o.order_id,
+        o.email,
+        o.total_amount,
+        o.order_date,
+        o.order_time,
+        p.product_id,
+        p.name AS product_name,
+        p.color,
+        p.size,
+        ocp.total_products AS quantity,
+        p.price AS unit_price
+      FROM orders o
+      JOIN order_contains_product ocp ON o.order_id = ocp.order_id
+      JOIN products p ON ocp.product_id = p.product_id
+      WHERE o.order_id = ?
+    `;
+
+    db.query(query, [order_id], async (err, results) => {
+      if (err) return res.status(500).send(err);
+      if (!results || results.length === 0) {
+        return res.status(404).json({ error: "Order not found." });
+      }
+
+      const order = {
+        order_id: results[0].order_id,
+        email: results[0].email,
+        total_amount: results[0].total_amount,
+        order_date: new Date(results[0].order_date).toLocaleDateString(),
+        order_time: results[0].order_time,
+        products: results.map((row) => ({
+          product_id: row.product_id,
+          name: row.product_name,
+          color: row.color,
+          size: row.size,
+          quantity: row.quantity,
+          unit_price: row.unit_price,
+          subtotal: row.unit_price * row.quantity,
+        })),
+      };
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(`Order_${order_id}`);
+
+      worksheet.columns = [
+        { header: "Order ID", key: "order_id", width: 10 },
+        { header: "Customer Email", key: "email", width: 25 },
+        { header: "Total Amount", key: "total_amount", width: 15 },
+        { header: "Order Date", key: "order_date", width: 15 },
+        { header: "Order Time", key: "order_time", width: 10 },
+        { header: "Products", key: "products_info", width: 100 },
+      ];
+
+      const productsInfo = order.products
+        .map(
+          (p) =>
+            `ID: ${p.product_id}, Name: ${p.name}, Color: ${p.color}, Size: ${p.size}, Qty: ${p.quantity}, Price: $${p.unit_price}, Subtotal: $${p.subtotal}`
+        )
+        .join("\n");
+
+      worksheet.addRow({
+        order_id: order.order_id,
+        email: order.email,
+        total_amount: order.total_amount,
+        order_date: order.order_date,
+        order_time: order.order_time,
+        products_info: productsInfo,
+      });
+
+      // Wrap text for products column
+      worksheet.getColumn("products_info").alignment = { wrapText: true };
+
+      const buffer = await workbook.xlsx.writeBuffer();
+
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=order_${order_id}.xlsx`
+      );
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.send(buffer);
+    });
+  } catch (err) {
+    console.error("Error exporting single order Excel:", err);
+    res.status(500).send("Failed to export order Excel.");
   }
 });
 
